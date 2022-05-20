@@ -1,0 +1,42 @@
+modLoader = "javafml"
+loaderVersion = "[40,)"
+#issueTrackerURL = ""
+license = "MIT"
+
+[[mods]]
+modId = "diamondauctionhouse"
+version = "${version}"
+displayName = "Diamond Auction House"
+authors = "IAmSneak"
+description = '''
+Adds an Auction House for the diamond economy mod
+'''
+logoFile = "icon.png"
+
+[[dependencies.diamondauctionhouse]]
+modId = "forge"
+mandatory = true
+versionRange = "[40,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.diamondauctionhouse]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[1.18.1,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.diamondauctionhouse]]
+modId = "diamondeconomy"
+mandatory = true
+versionRange = "[1.3.0,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.diamondauctionhouse]]
+modId = "cloth_config"
+mandatory = true
+versionRange = "[6.2.57,)"
+ordering = "NONE"
+side = "BOTH"
