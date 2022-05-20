@@ -18,15 +18,15 @@ public class AuctionHouseCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         if (DiamondEconomyConfig.getInstance().commandName != null) {
             dispatcher.register(
-                    Commands.literal(DiamondAuctionHouseConfig.getInstance().commandName)
-                            .executes(AuctionHouseCommand::auctionhouseCommand)
+                    Commands.literal(DiamondAuctionHouseConfig.getInstance().commandName).executes(AuctionHouseCommand::auctionhouseCommand)
+                    Commands.literal(DiamondAuctionHouseConfig.getInstance().auctionCommandName).executes(AuctionHouseCommand::auctionhouseCommand)
             );
         } else {
             dispatcher.register(
                     Commands.literal(DiamondEconomyConfig.getInstance().commandName)
                             .then(
-                                    Commands.literal(DiamondAuctionHouseConfig.getInstance().commandName)
-                                            .executes(AuctionHouseCommand::auctionhouseCommand)
+                                    Commands.literal(DiamondAuctionHouseConfig.getInstance().commandName).executes(AuctionHouseCommand::auctionhouseCommand)
+                                    Commands.literal(DiamondAuctionHouseConfig.getInstance().auctionCommandName).executes(AuctionHouseCommand::auctionCommand)
                             )
             );
         }
@@ -35,19 +35,25 @@ public class AuctionHouseCommand {
     private static int auctionhouseCommand(CommandContext<CommandSourceStack> objectCommandContext) {
         try {
             ServerPlayer player = objectCommandContext.getSource().getPlayerOrException();
-            PagedGui gui = new PagedGui(player, PagedGui::onClose) {
-                @Override
-                protected int getPageAmount() {
-                    return DiamondAuctionHouseConfig.getInstance().maxPages;
-                }
-
+            PagedGui gui = new PagedGui(player) {
                 @Override
                 protected DisplayElement getElement(int id) {
                     return null;
                 }
             };
 
-            //gui.setSlot(53, new GuiElementBuilder(Items.BARRIER, 1).setCallback((x, y, z) -> gui.close()));
+            for(int i = 0; i < 45; i++) {
+                //todo: replace filler with correct auction item
+                gui.setSlot(i, PagedGui.filler());
+            }
+
+            gui.setSlot(49, new GuiElementBuilder(Items.BARRIER, 1)
+                                .setName(new TranslatableComponent("spectatorMenu.close").withStyle(ChatFormatting.WHITE))
+                                .hideFlags()
+                                .setCallback((x, y, z) -> gui.close()));
+
+            gui.setSlot(48, PagedGui.previousPage());
+            gui.setSlot(50, PagedGui.nextPage());
 
             gui.setTitle(new TextComponent("Auction House"));
             gui.open();
@@ -55,6 +61,10 @@ public class AuctionHouseCommand {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return 0;
+    }
+
+    private static int auctionCommand(CommandContext<CommandSourceStack> objectCommandContext) {
         return 0;
     }
 }

@@ -1,3 +1,25 @@
+/*
+Copyright (c) 2020 DeatHunter
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
 package com.gmail.sneakdevs.diamondauctionhouse.gui;
 
 import eu.pb4.sgui.api.elements.GuiElement;
@@ -21,13 +43,11 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.Consumer;
 
 public abstract class PagedGui extends SimpleGui {
-    public static final int PAGE_SIZE = 9 * 4;
-    protected final Consumer<PagedGui> closeCallback;
+    public static final int PAGE_SIZE = 9 * 6;
     protected int page = 0;
 
-    public <T extends PagedGui> PagedGui(ServerPlayer player, @Nullable Consumer<T> closeCallback) {
+    public <T extends PagedGui> PagedGui(ServerPlayer player) {
         super(MenuType.GENERIC_9x6, player, false);
-        this.closeCallback = (Consumer<PagedGui>) closeCallback;
     }
 
     protected void nextPage() {
@@ -84,31 +104,16 @@ public abstract class PagedGui extends SimpleGui {
         return this.page;
     }
 
-    protected abstract int getPageAmount();
+    protected int getPageAmount() {
+        return DiamondAuctionHouseConfig.getInstance().maxPages;
+    }
 
     protected abstract DisplayElement getElement(int id);
-
-    protected DisplayElement getNavElement(int id) {
-        return switch (id) {
-            case 1 -> DisplayElement.previousPage(this);
-            case 3 -> DisplayElement.nextPage(this);
-            case 7 -> DisplayElement.of(
-                    new GuiElementBuilder(Items.BARRIER)
-                            .setName(new TranslatableComponent(this.closeCallback != null ? "gui.back" : "gui.back").withStyle(ChatFormatting.RED))
-                            .hideFlags()
-                            .setCallback((x, y, z) -> {
-                                playClickSound(this.player);
-                                this.close();
-                            })
-            );
-            default -> DisplayElement.filler();
-        };
-    }
 
     public record DisplayElement(@Nullable GuiElementInterface element, @Nullable Slot slot) {
         private static final DisplayElement EMPTY = DisplayElement.of(new GuiElement(ItemStack.EMPTY, GuiElementInterface.EMPTY_CALLBACK));
         private static final DisplayElement FILLER = DisplayElement.of(
-                new GuiElementBuilder(Items.WHITE_STAINED_GLASS_PANE)
+                new GuiElementBuilder(Items.LIGHT_GRAY_STAINED_GLASS_PANE)
                         .setName(new TextComponent(""))
                         .hideFlags()
         );
@@ -167,6 +172,7 @@ public abstract class PagedGui extends SimpleGui {
                                 .setSkullOwner(GuiTextures.GUI_PREVIOUS_PAGE_BLOCKED)
                 );
             }
+            
         }
 
         public static DisplayElement filler() {
@@ -175,6 +181,13 @@ public abstract class PagedGui extends SimpleGui {
 
         public static DisplayElement empty() {
             return EMPTY;
+        }
+
+        public static DisplayElement getAuctionItem() {
+            if (false) {
+                return empty();
+            }
+            return FILLER;
         }
     }
 
