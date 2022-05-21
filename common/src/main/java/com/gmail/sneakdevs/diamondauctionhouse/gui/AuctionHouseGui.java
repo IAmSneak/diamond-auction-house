@@ -20,13 +20,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-// This is heavily based off of the Polymer Port of Fabric Waystones
+// This is heavily based off of PagedGui from the Polymer Port of Fabric Waystones
 
 package com.gmail.sneakdevs.diamondauctionhouse.gui;
 
 import com.gmail.sneakdevs.diamondauctionhouse.DiamondAuctionHouse;
 import com.gmail.sneakdevs.diamondauctionhouse.auction.AuctionItem;
 import com.gmail.sneakdevs.diamondauctionhouse.config.DiamondAuctionHouseConfig;
+import eu.pb4.sgui.api.GuiHelpers;
 import eu.pb4.sgui.api.elements.GuiElement;
 import eu.pb4.sgui.api.elements.GuiElementBuilder;
 import eu.pb4.sgui.api.elements.GuiElementBuilderInterface;
@@ -45,15 +46,13 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.function.Consumer;
-
-public class PagedGui extends SimpleGui {
+public class AuctionHouseGui extends SimpleGui {
     public static final int PAGE_SIZE = 45; //9x5
     protected int page = 0;
     private int eye = 0;
     private int ticker = 0;
 
-    public <T extends PagedGui> PagedGui(ServerPlayer player) {
+    public <T extends AuctionHouseGui> AuctionHouseGui(ServerPlayer player) {
         super(MenuType.GENERIC_9x6, player, false);
     }
 
@@ -80,7 +79,7 @@ public class PagedGui extends SimpleGui {
             var element = this.getElement(i);
 
             if (element == null) {
-                element = DisplayElement.empty();
+                element = AuctionHouseDisplayElement.empty();
             }
 
             if (element.element() != null) {
@@ -94,7 +93,7 @@ public class PagedGui extends SimpleGui {
             var navElement = this.getNavElement(i);
 
             if (navElement == null) {
-                navElement = DisplayElement.EMPTY;
+                navElement = AuctionHouseDisplayElement.EMPTY;
             }
 
             if (navElement.element != null) {
@@ -105,10 +104,10 @@ public class PagedGui extends SimpleGui {
         }
     }
 
-    protected DisplayElement getNavElement(int id) {
+    protected AuctionHouseDisplayElement getNavElement(int id) {
         return switch (id) {
-            case 3 -> DisplayElement.previousPage(this);
-            case 4 -> DisplayElement.of(
+            case 3 -> AuctionHouseDisplayElement.previousPage(this);
+            case 4 -> AuctionHouseDisplayElement.of(
                     new GuiElementBuilder(Items.BARRIER)
                             .setName(new TranslatableComponent("spectatorMenu.close").withStyle(ChatFormatting.RED))
                             .hideFlags()
@@ -117,8 +116,8 @@ public class PagedGui extends SimpleGui {
                                 this.close();
                             })
             );
-            case 5 -> DisplayElement.nextPage(this);
-            case 8 -> DisplayElement.of(
+            case 5 -> AuctionHouseDisplayElement.nextPage(this);
+            case 8 -> AuctionHouseDisplayElement.of(
                     new GuiElementBuilder(Items.HOPPER)
                             .setName(new TextComponent("Expired Items").withStyle(ChatFormatting.RED))
                             .hideFlags()
@@ -128,7 +127,7 @@ public class PagedGui extends SimpleGui {
                             })
             );
 
-            default -> DisplayElement.filler();
+            default -> AuctionHouseDisplayElement.filler();
         };
     }
 
@@ -137,23 +136,23 @@ public class PagedGui extends SimpleGui {
     }
 
     protected int getPageAmount() {
-        return DiamondAuctionHouseConfig.getInstance().maxPages;
+        return Math.min(DiamondAuctionHouseConfig.getInstance().maxPages, DiamondAuctionHouse.ah.size() / PAGE_SIZE);
     }
 
-    protected DisplayElement getElement(int id) {
-        id = page * PAGE_SIZE + id;
-        if (id >= DiamondAuctionHouse.ah.size()) {
+    protected AuctionHouseDisplayElement getElement(int id) {
+        final int id1 = page * PAGE_SIZE + id;
+        if (id1 >= DiamondAuctionHouse.ah.size()) {
             return null;
         }
-        AuctionItem ai = DiamondAuctionHouse.ah.getItem(id);
-        return DisplayElement.of(
+        AuctionItem ai = DiamondAuctionHouse.ah.getItem(id1);
+        return AuctionHouseDisplayElement.of(
                 GuiElementBuilder.from(ai.getItemStack())
                         .addLoreLine(new TextComponent(ai.getTimeLeft()).withStyle(ChatFormatting.DARK_PURPLE))
                         .addLoreLine(new TextComponent("$" + ai.getPrice()).withStyle(ChatFormatting.DARK_PURPLE))
                         //todo change callback
                         .setCallback((x, y, z) -> {
                             playClickSound(this.player);
-                            this.close();
+                            openItemGui(DiamondAuctionHouse.ah.getItem(id1));
                         }));
     }
 
@@ -168,29 +167,37 @@ public class PagedGui extends SimpleGui {
         super.onTick();
     }
 
-    public record DisplayElement(@Nullable GuiElementInterface element, @Nullable Slot slot) {
-        private static final DisplayElement EMPTY = DisplayElement.of(new GuiElement(ItemStack.EMPTY, GuiElementInterface.EMPTY_CALLBACK));
-        private static final DisplayElement FILLER = DisplayElement.of(
+    public void openItemGui(AuctionItem item) {
+        this.close();
+        AuctionItemGui gui = new AuctionItemGui(player, item);
+        gui.updateDisplay();
+        gui.setTitle(new TextComponent("Buy"));
+        gui.open();
+    }
+
+    public static void playClickSound(ServerPlayer player) {
+        player.playNotifySound(SoundEvents.UI_BUTTON_CLICK, SoundSource.MASTER, 1, 1);
+    }
+
+    public record AuctionHouseDisplayElement(@Nullable GuiElementInterface element, @Nullable Slot slot) {
+        private static final AuctionHouseDisplayElement EMPTY = AuctionHouseDisplayElement.of(new GuiElement(ItemStack.EMPTY, GuiElementInterface.EMPTY_CALLBACK));
+        private static final AuctionHouseDisplayElement FILLER = AuctionHouseDisplayElement.of(
                 new GuiElementBuilder(Items.LIGHT_GRAY_STAINED_GLASS_PANE)
                         .setName(new TextComponent(""))
                         .hideFlags()
         );
 
-        public static DisplayElement of(GuiElementInterface element) {
-            return new DisplayElement(element, null);
+        public static AuctionHouseDisplayElement of(GuiElementInterface element) {
+            return new AuctionHouseDisplayElement(element, null);
         }
 
-        public static DisplayElement of(GuiElementBuilderInterface<?> element) {
-            return new DisplayElement(element.build(), null);
+        public static AuctionHouseDisplayElement of(GuiElementBuilderInterface<?> element) {
+            return new AuctionHouseDisplayElement(element.build(), null);
         }
 
-        public static DisplayElement of(Slot slot) {
-            return new DisplayElement(null, slot);
-        }
-
-        public static DisplayElement nextPage(PagedGui gui) {
+        public static AuctionHouseDisplayElement nextPage(AuctionHouseGui gui) {
             if (gui.canNextPage()) {
-                return DisplayElement.of(
+                return AuctionHouseDisplayElement.of(
                         new GuiElementBuilder(Items.PLAYER_HEAD)
                                 .setName(new TranslatableComponent("spectatorMenu.next_page").withStyle(ChatFormatting.WHITE))
                                 .hideFlags()
@@ -200,7 +207,7 @@ public class PagedGui extends SimpleGui {
                                     gui.nextPage();
                                 }));
             } else {
-                return DisplayElement.of(
+                return AuctionHouseDisplayElement.of(
                         new GuiElementBuilder(Items.PLAYER_HEAD)
                                 .setName(new TranslatableComponent("spectatorMenu.next_page").withStyle(ChatFormatting.DARK_GRAY))
                                 .hideFlags()
@@ -208,9 +215,9 @@ public class PagedGui extends SimpleGui {
             }
         }
 
-        public static DisplayElement previousPage(PagedGui gui) {
+        public static AuctionHouseDisplayElement previousPage(AuctionHouseGui gui) {
             if (gui.canPreviousPage()) {
-                return DisplayElement.of(
+                return AuctionHouseDisplayElement.of(
                         new GuiElementBuilder(Items.PLAYER_HEAD)
                                 .setName(new TranslatableComponent("spectatorMenu.previous_page").withStyle(ChatFormatting.WHITE))
                                 .hideFlags()
@@ -220,7 +227,7 @@ public class PagedGui extends SimpleGui {
                                     gui.previousPage();
                                 }));
             } else {
-                return DisplayElement.of(
+                return AuctionHouseDisplayElement.of(
                         new GuiElementBuilder(Items.PLAYER_HEAD)
                                 .setName(new TranslatableComponent("spectatorMenu.previous_page").withStyle(ChatFormatting.DARK_GRAY))
                                 .hideFlags()
@@ -228,23 +235,12 @@ public class PagedGui extends SimpleGui {
             }
         }
 
-        public static DisplayElement filler() {
+        public static AuctionHouseDisplayElement filler() {
             return FILLER;
         }
 
-        public static DisplayElement empty() {
+        public static AuctionHouseDisplayElement empty() {
             return EMPTY;
         }
-
-        public static DisplayElement getAuctionItem() {
-            if (false) {
-                return empty();
-            }
-            return FILLER;
-        }
-    }
-
-    public static final void playClickSound(ServerPlayer player) {
-        player.playNotifySound(SoundEvents.UI_BUTTON_CLICK, SoundSource.MASTER, 1, 1);
     }
 }

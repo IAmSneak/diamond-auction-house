@@ -2,7 +2,7 @@ package com.gmail.sneakdevs.diamondauctionhouse;
 
 import com.gmail.sneakdevs.diamondauctionhouse.auction.AuctionItem;
 import com.gmail.sneakdevs.diamondauctionhouse.config.DiamondAuctionHouseConfig;
-import com.gmail.sneakdevs.diamondauctionhouse.gui.PagedGui;
+import com.gmail.sneakdevs.diamondauctionhouse.gui.AuctionHouseGui;
 import com.gmail.sneakdevs.diamondeconomy.config.DiamondEconomyConfig;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -49,7 +49,7 @@ public class AuctionHouseCommand {
     }
 
     private static int auctionhouseCommand(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        PagedGui gui = new PagedGui(ctx.getSource().getPlayerOrException());
+        AuctionHouseGui gui = new AuctionHouseGui(ctx.getSource().getPlayerOrException());
         gui.updateDisplay();
         gui.setTitle(new TextComponent("Auction House"));
         gui.open();
@@ -63,7 +63,7 @@ public class AuctionHouseCommand {
             return 0;
         }
         //todo check if player has too many items on auction
-        if (DiamondAuctionHouse.ah.addItem(new AuctionItem(player.getMainHandItem(), player.getStringUUID(), price, DiamondAuctionHouseConfig.getInstance().auctionSeconds))) {
+        if (DiamondAuctionHouse.ah.addItem(new AuctionItem(player.getMainHandItem(), player.getStringUUID(), player.getName().getString(), price, DiamondAuctionHouseConfig.getInstance().auctionSeconds))) {
             player.getInventory().removeItem(player.getMainHandItem());
             ctx.getSource().sendSuccess(new TextComponent("Item successfully added to auction house for $" + price), true);
             return 0;

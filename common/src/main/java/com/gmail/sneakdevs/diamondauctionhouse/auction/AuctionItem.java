@@ -5,12 +5,14 @@ import net.minecraft.world.item.ItemStack;
 public class AuctionItem {
     private final ItemStack itemStack;
     private final String uuid;
+    private final String owner;
     private final int price;
     private int secondsLeft;
 
-    public AuctionItem(ItemStack stack, String uuid, int price, int secondsLeft) {
+    public AuctionItem(ItemStack stack, String uuid, String owner, int price, int secondsLeft) {
         this.itemStack = stack;
         this.uuid = uuid;
+        this.owner = owner;
         this.price = price;
         this.secondsLeft = secondsLeft;
     }
@@ -21,6 +23,10 @@ public class AuctionItem {
 
     public String getUuid() {
         return uuid;
+    }
+
+    public String getOwner() {
+        return owner;
     }
 
     public int getPrice() {
