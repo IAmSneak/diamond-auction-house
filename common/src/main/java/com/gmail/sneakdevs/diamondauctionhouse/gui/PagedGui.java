@@ -141,10 +141,10 @@ public class PagedGui extends SimpleGui {
     }
 
     protected DisplayElement getElement(int id) {
+        id = page * PAGE_SIZE + id;
         if (id >= DiamondAuctionHouse.ah.size()) {
             return null;
         }
-        id = page * PAGE_SIZE + id;
         AuctionItem ai = DiamondAuctionHouse.ah.getItem(id);
         return DisplayElement.of(
                 GuiElementBuilder.from(ai.getItemStack())

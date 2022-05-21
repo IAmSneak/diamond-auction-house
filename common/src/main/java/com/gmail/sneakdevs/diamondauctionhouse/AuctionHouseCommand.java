@@ -62,7 +62,8 @@ public class AuctionHouseCommand {
             ctx.getSource().sendSuccess(new TextComponent("You must be holding an item"), true);
             return 0;
         }
-        if (DiamondAuctionHouse.ah.addItem(new AuctionItem(player.getMainHandItem(), player.getStringUUID(), price, 60))) {
+        //todo check if player has too many items on auction
+        if (DiamondAuctionHouse.ah.addItem(new AuctionItem(player.getMainHandItem(), player.getStringUUID(), price, DiamondAuctionHouseConfig.getInstance().auctionSeconds))) {
             player.getInventory().removeItem(player.getMainHandItem());
             ctx.getSource().sendSuccess(new TextComponent("Item successfully added to auction house for $" + price), true);
             return 0;

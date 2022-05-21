@@ -30,11 +30,11 @@ public class AuctionItem {
     public String getTimeLeft() {
         int seconds = secondsLeft;
         int days = seconds / 86400;
-        seconds -= days * seconds;
+        seconds -= days * 86400;
         int hours = seconds / 3600;
         seconds -= hours * 3600;
-        int minutes = hours / 60;
-        seconds -= minutes / 60;
+        int minutes = seconds / 60;
+        seconds -= minutes * 60;
         if (days > 0) {
             return String.format("%02d:%02d:%02d" + "m", days, hours, minutes);
         } else {
