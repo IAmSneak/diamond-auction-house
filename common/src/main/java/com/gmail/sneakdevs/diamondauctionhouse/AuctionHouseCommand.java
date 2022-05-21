@@ -1,70 +1,73 @@
 package com.gmail.sneakdevs.diamondauctionhouse;
 
+import com.gmail.sneakdevs.diamondauctionhouse.auction.AuctionItem;
 import com.gmail.sneakdevs.diamondauctionhouse.config.DiamondAuctionHouseConfig;
 import com.gmail.sneakdevs.diamondauctionhouse.gui.PagedGui;
 import com.gmail.sneakdevs.diamondeconomy.config.DiamondEconomyConfig;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
-import eu.pb4.sgui.api.elements.GuiElementBuilder;
-import eu.pb4.sgui.api.gui.SimpleGui;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.inventory.MenuType;
-import net.minecraft.world.item.Items;
 
 public class AuctionHouseCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        if (DiamondEconomyConfig.getInstance().commandName != null) {
+        if (!DiamondAuctionHouseConfig.getInstance().useBaseCommand || DiamondEconomyConfig.getInstance().commandName == null) {
+            dispatcher.register(Commands.literal(DiamondAuctionHouseConfig.getInstance().auctionHouseCommandName).executes(AuctionHouseCommand::auctionhouseCommand));
             dispatcher.register(
-                    Commands.literal(DiamondAuctionHouseConfig.getInstance().commandName).executes(AuctionHouseCommand::auctionhouseCommand)
-                    Commands.literal(DiamondAuctionHouseConfig.getInstance().auctionCommandName).executes(AuctionHouseCommand::auctionhouseCommand)
+                    Commands.literal(DiamondAuctionHouseConfig.getInstance().auctionCommandName)
+                            .then(
+                                    Commands.argument("price", IntegerArgumentType.integer(0)).executes(e -> {
+                                        int price = IntegerArgumentType.getInteger(e, "price");
+                                        return auctionCommand(e, price);
+                                    })
+                            )
             );
         } else {
             dispatcher.register(
                     Commands.literal(DiamondEconomyConfig.getInstance().commandName)
                             .then(
-                                    Commands.literal(DiamondAuctionHouseConfig.getInstance().commandName).executes(AuctionHouseCommand::auctionhouseCommand)
-                                    Commands.literal(DiamondAuctionHouseConfig.getInstance().auctionCommandName).executes(AuctionHouseCommand::auctionCommand)
+                                    Commands.literal(DiamondAuctionHouseConfig.getInstance().auctionHouseCommandName).executes(AuctionHouseCommand::auctionhouseCommand)
+                            )
+            );
+            dispatcher.register(
+                    Commands.literal(DiamondEconomyConfig.getInstance().commandName)
+                            .then(
+                                    Commands.literal(DiamondAuctionHouseConfig.getInstance().auctionCommandName)
+                                            .then(
+                                                    Commands.argument("price", IntegerArgumentType.integer(0)).executes(e -> {
+                                                        int price = IntegerArgumentType.getInteger(e, "price");
+                                                        return auctionCommand(e, price);
+                                                    })
+                                            )
                             )
             );
         }
     }
 
-    private static int auctionhouseCommand(CommandContext<CommandSourceStack> objectCommandContext) {
-        try {
-            ServerPlayer player = objectCommandContext.getSource().getPlayerOrException();
-            PagedGui gui = new PagedGui(player) {
-                @Override
-                protected DisplayElement getElement(int id) {
-                    return null;
-                }
-            };
-
-            for(int i = 0; i < 45; i++) {
-                //todo: replace filler with correct auction item
-                gui.setSlot(i, PagedGui.filler());
-            }
-
-            gui.setSlot(49, new GuiElementBuilder(Items.BARRIER, 1)
-                                .setName(new TranslatableComponent("spectatorMenu.close").withStyle(ChatFormatting.WHITE))
-                                .hideFlags()
-                                .setCallback((x, y, z) -> gui.close()));
-
-            gui.setSlot(48, PagedGui.previousPage());
-            gui.setSlot(50, PagedGui.nextPage());
-
-            gui.setTitle(new TextComponent("Auction House"));
-            gui.open();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    private static int auctionhouseCommand(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        PagedGui gui = new PagedGui(ctx.getSource().getPlayerOrException());
+        gui.updateDisplay();
+        gui.setTitle(new TextComponent("Auction House"));
+        gui.open();
         return 0;
     }
 
-    private static int auctionCommand(CommandContext<CommandSourceStack> objectCommandContext) {
+    private static int auctionCommand(CommandContext<CommandSourceStack> ctx, int price) throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        if (player.getMainHandItem().isEmpty()) {
+            ctx.getSource().sendSuccess(new TextComponent("You must be holding an item"), true);
+            return 0;
+        }
+        if (DiamondAuctionHouse.ah.addItem(new AuctionItem(player.getMainHandItem(), player.getStringUUID(), price, 60))) {
+            player.getInventory().removeItem(player.getMainHandItem());
+            ctx.getSource().sendSuccess(new TextComponent("Item successfully added to auction house for $" + price), true);
+            return 0;
+        }
+        ctx.getSource().sendSuccess(new TextComponent("The auction house is full"), true);
         return 0;
     }
 }

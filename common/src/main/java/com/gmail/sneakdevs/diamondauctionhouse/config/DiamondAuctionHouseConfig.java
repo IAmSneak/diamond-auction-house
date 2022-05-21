@@ -7,8 +7,10 @@ import me.shedaniel.autoconfig.annotation.Config;
 
 @Config(name = DiamondAuctionHouse.MODID)
 public class DiamondAuctionHouseConfig implements ConfigData {
-    public String commandName = "ah";
+    public String auctionHouseCommandName = "ah";
     public String auctionCommandName = "auction";
+    public boolean useBaseCommand = false;
+    public int maxPlayerItems = 3;
     public int maxPages = 3;
 
     public static DiamondAuctionHouseConfig getInstance() {

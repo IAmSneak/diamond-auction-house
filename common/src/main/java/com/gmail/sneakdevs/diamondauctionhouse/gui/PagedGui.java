@@ -20,8 +20,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+// This is heavily based off of the Polymer Port of Fabric Waystones
+
 package com.gmail.sneakdevs.diamondauctionhouse.gui;
 
+import com.gmail.sneakdevs.diamondauctionhouse.DiamondAuctionHouse;
+import com.gmail.sneakdevs.diamondauctionhouse.auction.AuctionItem;
+import com.gmail.sneakdevs.diamondauctionhouse.config.DiamondAuctionHouseConfig;
 import eu.pb4.sgui.api.elements.GuiElement;
 import eu.pb4.sgui.api.elements.GuiElementBuilder;
 import eu.pb4.sgui.api.elements.GuiElementBuilderInterface;
@@ -42,9 +47,11 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
 
-public abstract class PagedGui extends SimpleGui {
-    public static final int PAGE_SIZE = 9 * 6;
+public class PagedGui extends SimpleGui {
+    public static final int PAGE_SIZE = 45; //9x5
     protected int page = 0;
+    private int eye = 0;
+    private int ticker = 0;
 
     public <T extends PagedGui> PagedGui(ServerPlayer player) {
         super(MenuType.GENERIC_9x6, player, false);
@@ -68,11 +75,9 @@ public abstract class PagedGui extends SimpleGui {
         return this.page - 1 >= 0;
     }
 
-    protected void updateDisplay() {
-        var offset = this.page * PAGE_SIZE;
-
+    public void updateDisplay() {
         for (int i = 0; i < PAGE_SIZE; i++) {
-            var element = this.getElement(offset + i);
+            var element = this.getElement(i);
 
             if (element == null) {
                 element = DisplayElement.empty();
@@ -100,6 +105,33 @@ public abstract class PagedGui extends SimpleGui {
         }
     }
 
+    protected DisplayElement getNavElement(int id) {
+        return switch (id) {
+            case 3 -> DisplayElement.previousPage(this);
+            case 4 -> DisplayElement.of(
+                    new GuiElementBuilder(Items.BARRIER)
+                            .setName(new TranslatableComponent("spectatorMenu.close").withStyle(ChatFormatting.RED))
+                            .hideFlags()
+                            .setCallback((x, y, z) -> {
+                                playClickSound(this.player);
+                                this.close();
+                            })
+            );
+            case 5 -> DisplayElement.nextPage(this);
+            case 8 -> DisplayElement.of(
+                    new GuiElementBuilder(Items.HOPPER)
+                            .setName(new TextComponent("Expired Items").withStyle(ChatFormatting.RED))
+                            .hideFlags()
+                            .setCallback((x, y, z) -> {
+                                playClickSound(this.player);
+                                this.close();
+                            })
+            );
+
+            default -> DisplayElement.filler();
+        };
+    }
+
     protected int getPage() {
         return this.page;
     }
@@ -108,7 +140,33 @@ public abstract class PagedGui extends SimpleGui {
         return DiamondAuctionHouseConfig.getInstance().maxPages;
     }
 
-    protected abstract DisplayElement getElement(int id);
+    protected DisplayElement getElement(int id) {
+        if (id >= DiamondAuctionHouse.ah.size()) {
+            return null;
+        }
+        id = page * PAGE_SIZE + id;
+        AuctionItem ai = DiamondAuctionHouse.ah.getItem(id);
+        return DisplayElement.of(
+                GuiElementBuilder.from(ai.getItemStack())
+                        .addLoreLine(new TextComponent(ai.getTimeLeft()).withStyle(ChatFormatting.DARK_PURPLE))
+                        .addLoreLine(new TextComponent("$" + ai.getPrice()).withStyle(ChatFormatting.DARK_PURPLE))
+                        //todo change callback
+                        .setCallback((x, y, z) -> {
+                            playClickSound(this.player);
+                            this.close();
+                        }));
+    }
+
+    @Override
+    public void onTick() {
+        ticker++;
+        if (ticker >= 20) {
+            ticker = 0;
+            updateDisplay();
+        }
+
+        super.onTick();
+    }
 
     public record DisplayElement(@Nullable GuiElementInterface element, @Nullable Slot slot) {
         private static final DisplayElement EMPTY = DisplayElement.of(new GuiElement(ItemStack.EMPTY, GuiElementInterface.EMPTY_CALLBACK));
@@ -140,15 +198,13 @@ public abstract class PagedGui extends SimpleGui {
                                 .setCallback((x, y, z) -> {
                                     playClickSound(gui.player);
                                     gui.nextPage();
-                                })
-                );
+                                }));
             } else {
                 return DisplayElement.of(
                         new GuiElementBuilder(Items.PLAYER_HEAD)
                                 .setName(new TranslatableComponent("spectatorMenu.next_page").withStyle(ChatFormatting.DARK_GRAY))
                                 .hideFlags()
-                                .setSkullOwner(GuiTextures.GUI_NEXT_PAGE_BLOCKED)
-                );
+                                .setSkullOwner(GuiTextures.GUI_NEXT_PAGE_BLOCKED));
             }
         }
 
@@ -162,17 +218,14 @@ public abstract class PagedGui extends SimpleGui {
                                 .setCallback((x, y, z) -> {
                                     playClickSound(gui.player);
                                     gui.previousPage();
-                                })
-                );
+                                }));
             } else {
                 return DisplayElement.of(
                         new GuiElementBuilder(Items.PLAYER_HEAD)
                                 .setName(new TranslatableComponent("spectatorMenu.previous_page").withStyle(ChatFormatting.DARK_GRAY))
                                 .hideFlags()
-                                .setSkullOwner(GuiTextures.GUI_PREVIOUS_PAGE_BLOCKED)
-                );
+                                .setSkullOwner(GuiTextures.GUI_PREVIOUS_PAGE_BLOCKED));
             }
-            
         }
 
         public static DisplayElement filler() {
