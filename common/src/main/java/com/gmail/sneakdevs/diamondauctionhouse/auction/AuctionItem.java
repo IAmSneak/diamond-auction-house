@@ -1,17 +1,39 @@
 package com.gmail.sneakdevs.diamondauctionhouse.auction;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.nbt.NbtUtils;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import org.lwjgl.system.CallbackI;
 
 public class AuctionItem {
     private final ItemStack itemStack;
     private final String uuid;
     private final String owner;
     private final int price;
+    private final int id;
     private int secondsLeft;
 
-    public AuctionItem(ItemStack stack, String uuid, String owner, int price, int secondsLeft) {
+    public AuctionItem(int id, String playerUuid, String owner, int price, int secondsLeft, ItemStack stack) {
+        this.id = id;
         this.itemStack = stack;
-        this.uuid = uuid;
+        this.uuid = playerUuid;
+        this.owner = owner;
+        this.price = price;
+        this.secondsLeft = secondsLeft;
+    }
+
+    public AuctionItem(int id, String playerUuid, String owner, int price, int secondsLeft, String tag) {
+        ItemStack itemStack1;
+        this.id = id;
+        try {
+            itemStack1 = ItemStack.of(NbtUtils.snbtToStructure(tag));
+        } catch (CommandSyntaxException e) {
+            e.printStackTrace();
+            itemStack1 = new ItemStack(Items.AIR);
+        }
+        this.itemStack = itemStack1;
+        this.uuid = playerUuid;
         this.owner = owner;
         this.price = price;
         this.secondsLeft = secondsLeft;
@@ -52,7 +74,9 @@ public class AuctionItem {
     }
 
     public boolean tickDeath() {
-        secondsLeft--;
-        return secondsLeft <= 0;
+        if (secondsLeft > 0) {
+            secondsLeft--;
+        }
+        return secondsLeft == 0;
     }
 }

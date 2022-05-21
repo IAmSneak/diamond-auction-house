@@ -18,6 +18,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.UUID;
+
 public class AuctionItemGui extends SimpleGui {
     private int ticker = 0;
     private final AuctionItem item;
@@ -47,23 +49,25 @@ public class AuctionItemGui extends SimpleGui {
         return switch (id) {
             case 0 -> AuctionItemDisplayElement.of(
                     new GuiElementBuilder(Items.CLOCK)
-                            .setName(new TextComponent("Time Left: " + item.getTimeLeft()).withStyle(ChatFormatting.RED))
+                            .setName(new TextComponent("Time Left: " + item.getTimeLeft()).withStyle(ChatFormatting.BLUE))
                             .hideFlags()
             );
             case 1 -> AuctionItemDisplayElement.of(
                     new GuiElementBuilder(Items.FLOWER_BANNER_PATTERN)
-                            .setName(new TextComponent("Price: $" + item.getPrice()).withStyle(ChatFormatting.RED))
+                            .setName(new TextComponent("Price: $" + item.getPrice()).withStyle(ChatFormatting.BLUE))
                             .hideFlags()
             );
             case 2 -> AuctionItemDisplayElement.of(
                     new GuiElementBuilder(Items.PLAYER_HEAD)
-                            .setName(new TextComponent("Owner: " + item.getOwner()).withStyle(ChatFormatting.RED))
+                            .setSkullOwner("", null, UUID.fromString(item.getUuid()))
+                            .setName(new TextComponent("Owner: " + item.getOwner()).withStyle(ChatFormatting.BLUE))
                             .hideFlags()
             );
             case 4 -> AuctionItemDisplayElement.of(GuiElementBuilder.from(item.getItemStack()));
+            //todo buy
             case 6 -> AuctionItemDisplayElement.of(
                     new GuiElementBuilder(Items.GREEN_STAINED_GLASS_PANE)
-                            .setName(new TextComponent("Confirm").withStyle(ChatFormatting.RED))
+                            .setName(new TextComponent("Confirm").withStyle(ChatFormatting.GREEN))
                             .hideFlags()
             );
             case 7 -> AuctionItemDisplayElement.of(
@@ -75,11 +79,7 @@ public class AuctionItemGui extends SimpleGui {
                                 this.close();
                             })
             );
-            case 8 -> AuctionItemDisplayElement.of(
-                    new GuiElementBuilder(Items.HOPPER)
-                            .setName(new TextComponent("Delete").withStyle(ChatFormatting.RED))
-                            .hideFlags()
-            );
+            case 8 -> trash();
 
             default -> AuctionItemDisplayElement.filler();
         };
@@ -100,19 +100,25 @@ public class AuctionItemGui extends SimpleGui {
         player.playNotifySound(SoundEvents.UI_BUTTON_CLICK, SoundSource.MASTER, 1, 1);
     }
 
-    public AuctionItemDisplayElement trash(AuctionHouseGui gui) {
+    //todo
+    public AuctionItemDisplayElement trash() {
         if (player.hasPermissions(4) || player.getStringUUID().equals(item.getUuid())) {
             return AuctionItemDisplayElement.of(
                     new GuiElementBuilder(Items.HOPPER)
-                            .setName(new TextComponent("Remove from Auction").withStyle(ChatFormatting.WHITE))
-                            .hideFlags()
-                            .setCallback((x, y, z) -> {
-                                playClickSound(player);
-                                gui.previousPage();
-                            }));
+                            .setName(new TextComponent("Remove from Auction").withStyle(ChatFormatting.RED))
+                            .hideFlags());
         } else {
             return AuctionItemDisplayElement.EMPTY;
         }
+    }
+
+    @Override
+    public void close() {
+        AuctionHouseGui gui = new AuctionHouseGui(player);
+        gui.updateDisplay();
+        gui.setTitle(new TextComponent("Auction House"));
+        gui.open();
+        super.close();
     }
 
     public record AuctionItemDisplayElement(@Nullable GuiElementInterface element, @Nullable Slot slot) {

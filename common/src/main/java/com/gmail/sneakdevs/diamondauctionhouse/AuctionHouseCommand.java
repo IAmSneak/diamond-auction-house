@@ -63,7 +63,7 @@ public class AuctionHouseCommand {
             return 0;
         }
         //todo check if player has too many items on auction
-        if (DiamondAuctionHouse.ah.addItem(new AuctionItem(player.getMainHandItem(), player.getStringUUID(), player.getName().getString(), price, DiamondAuctionHouseConfig.getInstance().auctionSeconds))) {
+        if (DiamondAuctionHouse.ah.addItem(new AuctionItem(DiamondAuctionHouse.getDatabaseManager().addItem(player.getStringUUID(), player.getName().getString(), price, DiamondAuctionHouseConfig.getInstance().auctionSeconds, player.getMainHandItem().getTag().getAsString()), player.getStringUUID(), player.getName().getString(), price, DiamondAuctionHouseConfig.getInstance().auctionSeconds, player.getMainHandItem()))) {
             player.getInventory().removeItem(player.getMainHandItem());
             ctx.getSource().sendSuccess(new TextComponent("Item successfully added to auction house for $" + price), true);
             return 0;

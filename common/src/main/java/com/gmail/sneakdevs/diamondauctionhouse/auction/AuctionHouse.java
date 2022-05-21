@@ -34,7 +34,7 @@ public class AuctionHouse {
 
     public void tick() {
         tick++;
-        if (tick == 20) {
+        if (tick % 20 == 0) {
             int i = 0;
             while (i < items.size()) {
                 if (items.get(i).tickDeath()) {
@@ -44,7 +44,9 @@ public class AuctionHouse {
                     i++;
                 }
             }
-            tick = 0;
+        }
+        if (tick % 600 == 0) {
+            //todo set auction times to equal real auction times
         }
     }
 }

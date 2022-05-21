@@ -21,6 +21,7 @@ dependencies {
 	modApi("me.shedaniel.cloth:cloth-config-fabric:${rootProject.cloth_config_version}") {
 		exclude(group: "net.fabricmc.fabric-api")
 	}
+	modImplementation ('com.github.IAmSneak:diamond-economy:4d516b37ea')
 	modImplementation include("eu.pb4:sgui:1.0.2+1.18.2")
 
 	common(project(path: ":common", configuration: "namedElements")) { transitive false }

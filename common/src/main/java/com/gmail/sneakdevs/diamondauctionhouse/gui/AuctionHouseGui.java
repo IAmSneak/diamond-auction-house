@@ -49,7 +49,6 @@ import org.jetbrains.annotations.Nullable;
 public class AuctionHouseGui extends SimpleGui {
     public static final int PAGE_SIZE = 45; //9x5
     protected int page = 0;
-    private int eye = 0;
     private int ticker = 0;
 
     public <T extends AuctionHouseGui> AuctionHouseGui(ServerPlayer player) {
@@ -117,6 +116,7 @@ public class AuctionHouseGui extends SimpleGui {
                             })
             );
             case 5 -> AuctionHouseDisplayElement.nextPage(this);
+            //todo
             case 8 -> AuctionHouseDisplayElement.of(
                     new GuiElementBuilder(Items.HOPPER)
                             .setName(new TextComponent("Expired Items").withStyle(ChatFormatting.RED))
