@@ -4,6 +4,7 @@ import com.gmail.sneakdevs.diamondsauctionhouse.auction.AuctionItem;
 import com.gmail.sneakdevs.diamondsauctionhouse.config.DiamondsAuctionHouseConfig;
 import com.gmail.sneakdevs.diamondsauctionhouse.gui.AuctionHouseGui;
 import com.gmail.sneakdevs.diamondeconomy.config.DiamondEconomyConfig;
+import com.gmail.sneakdevs.diamondsauctionhouse.sql.AuctionHouseDatabaseManager;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -64,10 +65,15 @@ public class AuctionHouseCommand {
             ctx.getSource().sendSuccess(new TextComponent("You must be holding an item"), true);
             return 0;
         }
-        //todo check if player has too many items on auction
+        AuctionHouseDatabaseManager dm = DiamondsAuctionHouse.getDatabaseManager();
+        String playerUuid = player.getStringUUID();
+        if ((dm.playerItemCount(playerUuid, "auctionhouse") + dm.playerItemCount(playerUuid, "expireditems")) >= DiamondsAuctionHouseConfig.getInstance().maxPlayerItems) {
+            ctx.getSource().sendSuccess(new TextComponent("You have too many items on auction"), true);
+            return 0;
+        }
         if (DiamondsAuctionHouse.ah.canAddItem()) {
             CompoundTag tag = player.getMainHandItem().getOrCreateTag();
-            DiamondsAuctionHouse.ah.addItem(new AuctionItem(DiamondsAuctionHouse.getDatabaseManager().addItemToAuction(player.getStringUUID(), player.getName().getString(), tag.getAsString(), String.valueOf(Registry.ITEM.getKey(player.getMainHandItem().getItem())), player.getMainHandItem().getCount(), price, DiamondsAuctionHouseConfig.getInstance().auctionSeconds), player.getStringUUID(), player.getName().getString(), player.getMainHandItem(), price, DiamondsAuctionHouseConfig.getInstance().auctionSeconds));
+            DiamondsAuctionHouse.ah.addItem(new AuctionItem(DiamondsAuctionHouse.getDatabaseManager().addItemToAuction(playerUuid, player.getName().getString(), tag.getAsString(), String.valueOf(Registry.ITEM.getKey(player.getMainHandItem().getItem())), player.getMainHandItem().getCount(), price, DiamondsAuctionHouseConfig.getInstance().auctionSeconds), playerUuid, player.getName().getString(), player.getMainHandItem(), price, DiamondsAuctionHouseConfig.getInstance().auctionSeconds));
             player.getInventory().removeItem(player.getMainHandItem());
             ctx.getSource().sendSuccess(new TextComponent("Item successfully added to auction house for $" + price), true);
             return 0;

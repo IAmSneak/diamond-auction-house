@@ -1,6 +1,7 @@
 package com.gmail.sneakdevs.diamondsauctionhouse;
 
 import com.gmail.sneakdevs.diamondsauctionhouse.auction.AuctionHouse;
+import com.gmail.sneakdevs.diamondsauctionhouse.auction.ExpiredItemList;
 import com.gmail.sneakdevs.diamondsauctionhouse.config.DiamondsAuctionHouseConfig;
 import com.gmail.sneakdevs.diamondsauctionhouse.sql.AuctionHouseDatabaseManager;
 import com.gmail.sneakdevs.diamondsauctionhouse.sql.AuctionHouseSQLiteDatabaseManager;
@@ -12,6 +13,7 @@ import net.minecraft.server.MinecraftServer;
 public class DiamondsAuctionHouse {
     public static final String MODID = "diamondsauctionhouse";
     public static AuctionHouse ah;
+    public static ExpiredItemList ei;
 
     public static AuctionHouseDatabaseManager getDatabaseManager() {
         return new AuctionHouseSQLiteDatabaseManager();
@@ -19,6 +21,7 @@ public class DiamondsAuctionHouse {
 
     public static void initServer(MinecraftServer server){
         ah = new AuctionHouse(AuctionHouseSQLiteDatabaseManager.getItemList());
+        ei = new ExpiredItemList(AuctionHouseSQLiteDatabaseManager.getExpiredItemList());
     }
 
     public static void init(){

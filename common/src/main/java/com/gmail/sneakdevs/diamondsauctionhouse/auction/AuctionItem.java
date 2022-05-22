@@ -2,6 +2,7 @@ package com.gmail.sneakdevs.diamondsauctionhouse.auction;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.core.Registry;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -32,7 +33,9 @@ public class AuctionItem {
         this.id = id;
         try {
             itemStack1 = new ItemStack(Registry.ITEM.get(ResourceLocation.tryParse(item)), count);
-            itemStack1.setTag(NbtUtils.snbtToStructure(tag));
+            CompoundTag nbt = NbtUtils.snbtToStructure(tag);
+            nbt.remove("palette");
+            itemStack1.setTag(nbt);
         } catch (CommandSyntaxException e) {
             e.printStackTrace();
             itemStack1 = new ItemStack(Items.AIR);
@@ -43,7 +46,6 @@ public class AuctionItem {
         this.owner = owner;
         this.price = price;
         this.secondsLeft = secondsLeft;
-
     }
 
     public int getId() {

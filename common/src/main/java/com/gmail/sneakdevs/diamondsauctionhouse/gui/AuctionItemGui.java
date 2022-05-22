@@ -9,7 +9,6 @@ import eu.pb4.sgui.api.elements.GuiElementBuilderInterface;
 import eu.pb4.sgui.api.elements.GuiElementInterface;
 import eu.pb4.sgui.api.gui.SimpleGui;
 import net.minecraft.ChatFormatting;
-import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -53,7 +52,7 @@ public class AuctionItemGui extends SimpleGui {
                             .hideFlags()
             );
             case 1 -> AuctionItemDisplayElement.of(
-                    new GuiElementBuilder(Items.FLOWER_BANNER_PATTERN)
+                    new GuiElementBuilder(Items.PAPER)
                             .setName(new TextComponent("Price: $" + item.getPrice()).withStyle(ChatFormatting.BLUE))
                             .hideFlags()
             );
@@ -123,7 +122,6 @@ public class AuctionItemGui extends SimpleGui {
         }
     }
 
-    //todo head
     private AuctionItemDisplayElement skull() {
         ItemStack stack = new ItemStack(Items.PLAYER_HEAD);
         stack.getOrCreateTag().putString("SkullOwner",  item.getOwner());
@@ -147,16 +145,17 @@ public class AuctionItemGui extends SimpleGui {
     }
 
     private void buy() {
-        if (DiamondsAuctionHouse.getDatabaseManager().itemForAuction(item.getId())) {
+        if (DiamondsAuctionHouse.getDatabaseManager().isItemForAuction(item.getId())) {
             if (player.getInventory().getFreeSlot() != -1) {
                 if (DiamondEconomy.getDatabaseManager().changeBalance(item.getUuid(), item.getPrice())) {
                     DiamondEconomy.getDatabaseManager().changeBalance(player.getStringUUID(), -item.getPrice());
                     DiamondsAuctionHouse.getDatabaseManager().removeItemFromAuction(item);
+                    DiamondsAuctionHouse.ah.removeItem(item);
                     player.getInventory().add(item.getItemStack());
                 }
             }
         } else {
-            player.sendMessage(new TextComponent("ahhh"), player.getUUID());
+            player.sendMessage(new TextComponent("That item was already bought"), player.getUUID());
         }
         super.close();
     }

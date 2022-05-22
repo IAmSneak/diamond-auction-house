@@ -104,6 +104,7 @@ public class AuctionHouseGui extends SimpleGui {
 
     protected AuctionHouseDisplayElement getNavElement(int id) {
         return switch (id) {
+            case 0 -> skull();
             case 3 -> AuctionHouseDisplayElement.previousPage(this);
             case 4 -> AuctionHouseDisplayElement.of(
                     new GuiElementBuilder(Items.BARRIER)
@@ -164,7 +165,7 @@ public class AuctionHouseGui extends SimpleGui {
         super.onTick();
     }
 
-    public void openItemGui(AuctionItem item) {
+    protected void openItemGui(AuctionItem item) {
         this.close();
         AuctionItemGui gui = new AuctionItemGui(player, item);
         gui.updateDisplay();
@@ -172,7 +173,7 @@ public class AuctionHouseGui extends SimpleGui {
         gui.open();
     }
 
-    public void openExpiredGui() {
+    private void openExpiredGui() {
         this.close();
         ExpiredItemsGui gui = new ExpiredItemsGui(player);
         gui.updateDisplay();
@@ -180,7 +181,28 @@ public class AuctionHouseGui extends SimpleGui {
         gui.open();
     }
 
-    public static void playClickSound(ServerPlayer player) {
+    private void openPersonal() {
+        this.close();
+        PersonalAuctionHouseGui gui = new PersonalAuctionHouseGui(player);
+        gui.updateDisplay();
+        gui.setTitle(new TextComponent("My Items"));
+        gui.open();
+    }
+
+    private AuctionHouseDisplayElement skull() {
+        ItemStack stack = new ItemStack(Items.PLAYER_HEAD);
+        stack.getOrCreateTag().putString("SkullOwner",  player.getName().getString());
+        return AuctionHouseDisplayElement.of(GuiElementBuilder.from(stack)
+                .setName(new TextComponent("My Items").withStyle(ChatFormatting.BLUE))
+                .hideFlags()
+                .setCallback((x, y, z) -> {
+                    playClickSound(this.player);
+                    openPersonal();
+                }));
+
+    }
+
+    protected static void playClickSound(ServerPlayer player) {
         player.playNotifySound(SoundEvents.UI_BUTTON_CLICK, SoundSource.MASTER, 1, 1);
     }
 

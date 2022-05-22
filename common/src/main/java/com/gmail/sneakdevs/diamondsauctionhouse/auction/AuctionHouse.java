@@ -21,6 +21,10 @@ public class AuctionHouse {
         items.add(item);
     }
 
+    public void removeItem(AuctionItem item) {
+        items.remove(item);
+    }
+
     public AuctionItem getItem(int item) {
         return items.get(item);
     }
@@ -36,7 +40,6 @@ public class AuctionHouse {
             while (i < items.size()) {
                 if (items.get(i).tickDeath()) {
                     DiamondsAuctionHouse.getDatabaseManager().expireItem(items.get(i));
-                    items.remove(i);
                 } else {
                     i++;
                 }
@@ -47,5 +50,15 @@ public class AuctionHouse {
                 DiamondsAuctionHouse.getDatabaseManager().updateTime(item.getId(), item.getSecondsLeft());
             }
         }
+    }
+
+    public AuctionHouse getPlayerAuctionHouse(String uuid) {
+        AuctionHouse ah = new AuctionHouse(new ArrayList<>());
+        for (AuctionItem item: items) {
+            if (item.getUuid().equals(uuid)) {
+                ah.addItem(item);
+            }
+        }
+        return ah;
     }
 }

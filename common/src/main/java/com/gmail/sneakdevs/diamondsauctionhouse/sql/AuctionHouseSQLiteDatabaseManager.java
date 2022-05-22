@@ -1,5 +1,6 @@
 package com.gmail.sneakdevs.diamondsauctionhouse.sql;
 
+import com.gmail.sneakdevs.diamondsauctionhouse.DiamondsAuctionHouse;
 import com.gmail.sneakdevs.diamondsauctionhouse.auction.AuctionItem;
 import com.gmail.sneakdevs.diamondeconomy.sql.SQLiteDatabaseManager;
 
@@ -24,6 +25,20 @@ public class AuctionHouseSQLiteDatabaseManager implements AuctionHouseDatabaseMa
         try (Connection conn = DriverManager.getConnection(SQLiteDatabaseManager.url); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
                 list.add(new AuctionItem(rs.getInt("id"), rs.getString("playeruuid"), rs.getString("owner"), rs.getString("tag"), rs.getString("item"), rs.getInt("count"), rs.getInt("price"), rs.getInt("secondsleft")));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public static ArrayList<AuctionItem> getExpiredItemList(){
+        String sql = "SELECT * FROM expireditems";
+        ArrayList<AuctionItem> list = new ArrayList<>();
+
+        try (Connection conn = DriverManager.getConnection(SQLiteDatabaseManager.url); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                list.add(new AuctionItem(rs.getInt("id"), rs.getString("playeruuid"), rs.getString("owner"), rs.getString("tag"), rs.getString("item"), rs.getInt("count"), rs.getInt("price"), 0));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -72,7 +87,7 @@ public class AuctionHouseSQLiteDatabaseManager implements AuctionHouseDatabaseMa
         return -1;
     }
 
-    public boolean itemForAuction(int id) {
+    public boolean isItemForAuction(int id) {
         String sql = "SELECT Count(id) FROM auctionhouse WHERE id = " + id;
         try (Connection conn = this.connect(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)){
             rs.next();
@@ -107,17 +122,31 @@ public class AuctionHouseSQLiteDatabaseManager implements AuctionHouseDatabaseMa
 
     public void expireItem(AuctionItem item) {
         removeItemFromAuction(item);
-        String sql = "INSERT INTO expireditems(playeruuid,owner,tag,item,count,price) VALUES(?,?,?,?,?,?)";
+        DiamondsAuctionHouse.ah.removeItem(item);
+        DiamondsAuctionHouse.ei.addItem(item);
+        String sql = "INSERT INTO expireditems(id,playeruuid,owner,tag,item,count,price) VALUES(?,?,?,?,?,?,?)";
         try (Connection conn = this.connect(); PreparedStatement pstmt = conn.prepareStatement(sql)){
-            pstmt.setString(1, item.getUuid());
-            pstmt.setString(2, item.getOwner());
-            pstmt.setString(3, item.getTag());
-            pstmt.setString(4, item.getName());
-            pstmt.setInt(5, item.getItemStack().getCount());
-            pstmt.setInt(6, item.getPrice());
+            pstmt.setInt(1, item.getId());
+            pstmt.setString(2, item.getUuid());
+            pstmt.setString(3, item.getOwner());
+            pstmt.setString(4, item.getTag());
+            pstmt.setString(5, item.getName());
+            pstmt.setInt(6, item.getItemStack().getCount());
+            pstmt.setInt(7, item.getPrice());
             pstmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public int playerItemCount(String playeruuid, String table) {
+        String sql = "SELECT Count(*) FROM " + table + " WHERE playeruuid = '" + playeruuid + "'";
+        try (Connection conn = this.connect(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)){
+            rs.next();
+            return rs.getInt(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1;
     }
 }
