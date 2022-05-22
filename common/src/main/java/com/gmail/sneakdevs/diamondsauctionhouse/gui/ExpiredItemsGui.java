@@ -79,7 +79,7 @@ public class ExpiredItemsGui extends SimpleGui {
             var element = this.getElement(i);
 
             if (element == null) {
-                element = AuctionHouseDisplayElement.empty();
+                element = DisplayElement.empty();
             }
 
             if (element.element() != null) {
@@ -93,7 +93,7 @@ public class ExpiredItemsGui extends SimpleGui {
             var navElement = this.getNavElement(i);
 
             if (navElement == null) {
-                navElement = AuctionHouseDisplayElement.EMPTY;
+                navElement = DisplayElement.EMPTY;
             }
 
             if (navElement.element != null) {
@@ -104,10 +104,10 @@ public class ExpiredItemsGui extends SimpleGui {
         }
     }
 
-    protected AuctionHouseDisplayElement getNavElement(int id) {
+    protected DisplayElement getNavElement(int id) {
         return switch (id) {
-            case 3 -> AuctionHouseDisplayElement.previousPage(this);
-            case 4 -> AuctionHouseDisplayElement.of(
+            case 3 -> DisplayElement.previousPage(this);
+            case 4 -> DisplayElement.of(
                     new GuiElementBuilder(Items.BARRIER)
                             .setName(new TranslatableComponent("spectatorMenu.close").withStyle(ChatFormatting.RED))
                             .hideFlags()
@@ -116,25 +116,21 @@ public class ExpiredItemsGui extends SimpleGui {
                                 this.close();
                             })
             );
-            case 5 -> AuctionHouseDisplayElement.nextPage(this);
-            default -> AuctionHouseDisplayElement.filler();
+            case 5 -> DisplayElement.nextPage(this);
+            default -> DisplayElement.filler();
         };
-    }
-
-    protected int getPage() {
-        return this.page;
     }
 
     protected int getPageAmount() {
         return Math.min(DiamondsAuctionHouseConfig.getInstance().maxPages, expired.size() / PAGE_SIZE + 1);
     }
 
-    protected AuctionHouseDisplayElement getElement(int id) {
+    protected DisplayElement getElement(int id) {
         final int id1 = page * PAGE_SIZE + id;
         if (id1 >= expired.size()) {
             return null;
         }
-        return AuctionHouseDisplayElement.of(
+        return DisplayElement.of(
                 GuiElementBuilder.from(expired.getItem(id1).getItemStack())
                         .setCallback((x, y, z) -> {
                             playClickSound(this.player);
@@ -166,25 +162,25 @@ public class ExpiredItemsGui extends SimpleGui {
         player.playNotifySound(SoundEvents.UI_BUTTON_CLICK, SoundSource.MASTER, 1, 1);
     }
 
-    public record AuctionHouseDisplayElement(@Nullable GuiElementInterface element, @Nullable Slot slot) {
-        private static final AuctionHouseDisplayElement EMPTY = AuctionHouseDisplayElement.of(new GuiElement(ItemStack.EMPTY, GuiElementInterface.EMPTY_CALLBACK));
-        private static final AuctionHouseDisplayElement FILLER = AuctionHouseDisplayElement.of(
+    public record DisplayElement(@Nullable GuiElementInterface element, @Nullable Slot slot) {
+        private static final DisplayElement EMPTY = DisplayElement.of(new GuiElement(ItemStack.EMPTY, GuiElementInterface.EMPTY_CALLBACK));
+        private static final DisplayElement FILLER = DisplayElement.of(
                 new GuiElementBuilder(Items.LIGHT_GRAY_STAINED_GLASS_PANE)
                         .setName(new TextComponent(""))
                         .hideFlags()
         );
 
-        public static AuctionHouseDisplayElement of(GuiElementInterface element) {
-            return new AuctionHouseDisplayElement(element, null);
+        public static DisplayElement of(GuiElementInterface element) {
+            return new DisplayElement(element, null);
         }
 
-        public static AuctionHouseDisplayElement of(GuiElementBuilderInterface<?> element) {
-            return new AuctionHouseDisplayElement(element.build(), null);
+        public static DisplayElement of(GuiElementBuilderInterface<?> element) {
+            return new DisplayElement(element.build(), null);
         }
 
-        public static AuctionHouseDisplayElement nextPage(ExpiredItemsGui gui) {
+        public static DisplayElement nextPage(ExpiredItemsGui gui) {
             if (gui.canNextPage()) {
-                return AuctionHouseDisplayElement.of(
+                return DisplayElement.of(
                         new GuiElementBuilder(Items.PLAYER_HEAD)
                                 .setName(new TranslatableComponent("spectatorMenu.next_page").withStyle(ChatFormatting.WHITE))
                                 .hideFlags()
@@ -194,7 +190,7 @@ public class ExpiredItemsGui extends SimpleGui {
                                     gui.nextPage();
                                 }));
             } else {
-                return AuctionHouseDisplayElement.of(
+                return DisplayElement.of(
                         new GuiElementBuilder(Items.PLAYER_HEAD)
                                 .setName(new TranslatableComponent("spectatorMenu.next_page").withStyle(ChatFormatting.DARK_GRAY))
                                 .hideFlags()
@@ -202,9 +198,9 @@ public class ExpiredItemsGui extends SimpleGui {
             }
         }
 
-        public static AuctionHouseDisplayElement previousPage(ExpiredItemsGui gui) {
+        public static DisplayElement previousPage(ExpiredItemsGui gui) {
             if (gui.canPreviousPage()) {
-                return AuctionHouseDisplayElement.of(
+                return DisplayElement.of(
                         new GuiElementBuilder(Items.PLAYER_HEAD)
                                 .setName(new TranslatableComponent("spectatorMenu.previous_page").withStyle(ChatFormatting.WHITE))
                                 .hideFlags()
@@ -214,7 +210,7 @@ public class ExpiredItemsGui extends SimpleGui {
                                     gui.previousPage();
                                 }));
             } else {
-                return AuctionHouseDisplayElement.of(
+                return DisplayElement.of(
                         new GuiElementBuilder(Items.PLAYER_HEAD)
                                 .setName(new TranslatableComponent("spectatorMenu.previous_page").withStyle(ChatFormatting.DARK_GRAY))
                                 .hideFlags()
@@ -222,11 +218,11 @@ public class ExpiredItemsGui extends SimpleGui {
             }
         }
 
-        public static AuctionHouseDisplayElement filler() {
+        public static DisplayElement filler() {
             return FILLER;
         }
 
-        public static AuctionHouseDisplayElement empty() {
+        public static DisplayElement empty() {
             return EMPTY;
         }
     }

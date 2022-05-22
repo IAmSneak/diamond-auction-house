@@ -33,7 +33,7 @@ public class AuctionItemGui extends SimpleGui {
             var navElement = this.getNavElement(i);
 
             if (navElement == null) {
-                navElement = AuctionItemDisplayElement.EMPTY;
+                navElement = DisplayElement.EMPTY;
             }
 
             if (navElement.element != null) {
@@ -44,22 +44,22 @@ public class AuctionItemGui extends SimpleGui {
         }
     }
 
-    protected AuctionItemDisplayElement getNavElement(int id) {
+    protected DisplayElement getNavElement(int id) {
         return switch (id) {
-            case 0 -> AuctionItemDisplayElement.of(
+            case 0 -> DisplayElement.of(
                     new GuiElementBuilder(Items.CLOCK)
                             .setName(new TextComponent("Time Left: " + item.getTimeLeft()).withStyle(ChatFormatting.BLUE))
                             .hideFlags()
             );
-            case 1 -> AuctionItemDisplayElement.of(
+            case 1 -> DisplayElement.of(
                     new GuiElementBuilder(Items.PAPER)
                             .setName(new TextComponent("Price: $" + item.getPrice()).withStyle(ChatFormatting.BLUE))
                             .hideFlags()
             );
             case 2 -> skull();
-            case 4 -> AuctionItemDisplayElement.of(GuiElementBuilder.from(item.getItemStack()));
+            case 4 -> DisplayElement.of(GuiElementBuilder.from(item.getItemStack()));
             case 6 -> confirm();
-            case 7 -> AuctionItemDisplayElement.of(
+            case 7 -> DisplayElement.of(
                     new GuiElementBuilder(Items.RED_STAINED_GLASS_PANE)
                             .setName(new TextComponent("Cancel").withStyle(ChatFormatting.RED))
                             .hideFlags()
@@ -70,7 +70,7 @@ public class AuctionItemGui extends SimpleGui {
             );
             case 8 -> trash();
 
-            default -> AuctionItemDisplayElement.filler();
+            default -> DisplayElement.filler();
         };
     }
 
@@ -89,9 +89,9 @@ public class AuctionItemGui extends SimpleGui {
         player.playNotifySound(SoundEvents.UI_BUTTON_CLICK, SoundSource.MASTER, 1, 1);
     }
 
-    private AuctionItemDisplayElement confirm() {
+    private DisplayElement confirm() {
         if (item.getPrice() < DiamondEconomy.getDatabaseManager().getBalanceFromUUID(player.getStringUUID())) {
-            return AuctionItemDisplayElement.of(
+            return DisplayElement.of(
                     new GuiElementBuilder(Items.GREEN_STAINED_GLASS_PANE)
                             .setName(new TextComponent("Confirm").withStyle(ChatFormatting.GREEN))
                             .hideFlags()
@@ -100,16 +100,16 @@ public class AuctionItemGui extends SimpleGui {
                                 this.buy();
                             }));
         } else {
-            return AuctionItemDisplayElement.of(
+            return DisplayElement.of(
                     new GuiElementBuilder(Items.GRAY_STAINED_GLASS_PANE)
                             .setName(new TextComponent("Confirm").withStyle(ChatFormatting.DARK_GRAY))
                             .hideFlags());
         }
     }
 
-    private AuctionItemDisplayElement trash() {
+    private DisplayElement trash() {
         if (player.hasPermissions(4) || player.getStringUUID().equals(item.getUuid())) {
-            return AuctionItemDisplayElement.of(
+            return DisplayElement.of(
                     new GuiElementBuilder(Items.HOPPER)
                             .setName(new TextComponent("Remove from Auction").withStyle(ChatFormatting.RED))
                             .hideFlags()
@@ -118,14 +118,14 @@ public class AuctionItemGui extends SimpleGui {
                                 this.remove();
                             }));
         } else {
-            return AuctionItemDisplayElement.EMPTY;
+            return DisplayElement.EMPTY;
         }
     }
 
-    private AuctionItemDisplayElement skull() {
+    private DisplayElement skull() {
         ItemStack stack = new ItemStack(Items.PLAYER_HEAD);
         stack.getOrCreateTag().putString("SkullOwner",  item.getOwner());
-        return AuctionItemDisplayElement.of(GuiElementBuilder.from(stack)
+        return DisplayElement.of(GuiElementBuilder.from(stack)
                 .setName(new TextComponent("Owner: " + item.getOwner()).withStyle(ChatFormatting.BLUE))
                 .hideFlags());
     }
@@ -160,23 +160,23 @@ public class AuctionItemGui extends SimpleGui {
         super.close();
     }
 
-    public record AuctionItemDisplayElement(@Nullable GuiElementInterface element, @Nullable Slot slot) {
-        private static final AuctionItemDisplayElement EMPTY = AuctionItemDisplayElement.of(new GuiElement(ItemStack.EMPTY, GuiElementInterface.EMPTY_CALLBACK));
-        private static final AuctionItemDisplayElement FILLER = AuctionItemDisplayElement.of(
+    public record DisplayElement(@Nullable GuiElementInterface element, @Nullable Slot slot) {
+        private static final DisplayElement EMPTY = DisplayElement.of(new GuiElement(ItemStack.EMPTY, GuiElementInterface.EMPTY_CALLBACK));
+        private static final DisplayElement FILLER = DisplayElement.of(
                 new GuiElementBuilder(Items.LIGHT_GRAY_STAINED_GLASS_PANE)
                         .setName(new TextComponent(""))
                         .hideFlags()
         );
 
-        public static AuctionItemDisplayElement of(GuiElementInterface element) {
-            return new AuctionItemDisplayElement(element, null);
+        public static DisplayElement of(GuiElementInterface element) {
+            return new DisplayElement(element, null);
         }
 
-        public static AuctionItemDisplayElement of(GuiElementBuilderInterface<?> element) {
-            return new AuctionItemDisplayElement(element.build(), null);
+        public static DisplayElement of(GuiElementBuilderInterface<?> element) {
+            return new DisplayElement(element.build(), null);
         }
 
-        public static AuctionItemDisplayElement filler() {
+        public static DisplayElement filler() {
             return FILLER;
         }
     }
