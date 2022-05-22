@@ -1,6 +1,7 @@
-package com.gmail.sneakdevs.diamondauctionhouse.auction;
+package com.gmail.sneakdevs.diamondsauctionhouse.auction;
 
-import com.gmail.sneakdevs.diamondauctionhouse.config.DiamondAuctionHouseConfig;
+import com.gmail.sneakdevs.diamondsauctionhouse.DiamondsAuctionHouse;
+import com.gmail.sneakdevs.diamondsauctionhouse.config.DiamondsAuctionHouseConfig;
 
 import java.util.ArrayList;
 
@@ -8,20 +9,16 @@ public class AuctionHouse {
     private int tick = 0;
     private ArrayList<AuctionItem> items;
 
-    public AuctionHouse(){
-        this.items = new ArrayList<>();
-    }
-
     public AuctionHouse(ArrayList<AuctionItem> items){
         this.items = items;
     }
 
-    public boolean addItem(AuctionItem item) {
-        if (items.size() <= DiamondAuctionHouseConfig.getInstance().maxPages * 45) {
-            items.add(item);
-            return true;
-        }
-        return false;
+    public boolean canAddItem() {
+        return items.size() <= DiamondsAuctionHouseConfig.getInstance().maxPages * 45;
+    }
+
+    public void addItem(AuctionItem item) {
+        items.add(item);
     }
 
     public AuctionItem getItem(int item) {
@@ -45,8 +42,10 @@ public class AuctionHouse {
                 }
             }
         }
-        if (tick % 600 == 0) {
-            //todo set auction times to equal real auction times
+        if (tick % 300 == 0) {
+            for (AuctionItem item: items) {
+                DiamondsAuctionHouse.getDatabaseManager().updateTime(item.getId(), item.getSecondsLeft());
+            }
         }
     }
 }

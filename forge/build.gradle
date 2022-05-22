@@ -9,7 +9,7 @@ architectury {
 
 loom {
     forge {
-        mixinConfig "diamondauctionhouse.mixins.json"
+        mixinConfig "diamondsauctionhouse.mixins.json"
     }
 }
 
@@ -23,8 +23,6 @@ configurations {
 
 dependencies {
     forge "net.minecraftforge:forge:${rootProject.forge_version}"
-    modApi "me.shedaniel.cloth:cloth-config-forge:${rootProject.cloth_config_version}"
-    modApi ('com.github.IAmSneak:diamond-economy:4d516b37ea')
 
     shadowCommon("eu.pb4:sgui:1.0.2+1.18.2")
     common("eu.pb4:sgui:1.0.2+1.18.2")

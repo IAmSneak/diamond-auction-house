@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "diamondauctionhouse",
+  "id": "diamondsauctionhouse",
   "version": "${version}",
 
   "name": "Diamond Auction House",
@@ -18,20 +18,16 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "com.gmail.sneakdevs.diamondauctionhousefabric.DiamondAuctionHouseFabric"
+      "com.gmail.sneakdevs.diamondsauctionhousefabric.DiamondsAuctionHouseFabric"
     ]
   },
   "mixins": [
-    "diamondauctionhouse.mixins.json"
+    "diamondsauctionhouse.mixins.json"
   ],
 
   "depends": {
     "fabricloader": ">=0.7.4",
-    "fabric": "*",
-    "diamondeconomy": ">=1.3.0",
+    "diamondeconomy": ">=1.4.0",
     "cloth-config2": ">=6.2.57"
-  },
-  "suggests": {
-    "another-mod": "*"
   }
 }

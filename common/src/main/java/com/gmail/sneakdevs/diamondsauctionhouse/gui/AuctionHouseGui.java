@@ -22,12 +22,11 @@ SOFTWARE.
 
 // This is heavily based off of PagedGui from the Polymer Port of Fabric Waystones
 
-package com.gmail.sneakdevs.diamondauctionhouse.gui;
+package com.gmail.sneakdevs.diamondsauctionhouse.gui;
 
-import com.gmail.sneakdevs.diamondauctionhouse.DiamondAuctionHouse;
-import com.gmail.sneakdevs.diamondauctionhouse.auction.AuctionItem;
-import com.gmail.sneakdevs.diamondauctionhouse.config.DiamondAuctionHouseConfig;
-import eu.pb4.sgui.api.GuiHelpers;
+import com.gmail.sneakdevs.diamondsauctionhouse.DiamondsAuctionHouse;
+import com.gmail.sneakdevs.diamondsauctionhouse.auction.AuctionItem;
+import com.gmail.sneakdevs.diamondsauctionhouse.config.DiamondsAuctionHouseConfig;
 import eu.pb4.sgui.api.elements.GuiElement;
 import eu.pb4.sgui.api.elements.GuiElementBuilder;
 import eu.pb4.sgui.api.elements.GuiElementBuilderInterface;
@@ -116,7 +115,7 @@ public class AuctionHouseGui extends SimpleGui {
                             })
             );
             case 5 -> AuctionHouseDisplayElement.nextPage(this);
-            //todo
+            //todo set callback to open expired items gui
             case 8 -> AuctionHouseDisplayElement.of(
                     new GuiElementBuilder(Items.HOPPER)
                             .setName(new TextComponent("Expired Items").withStyle(ChatFormatting.RED))
@@ -136,23 +135,22 @@ public class AuctionHouseGui extends SimpleGui {
     }
 
     protected int getPageAmount() {
-        return Math.min(DiamondAuctionHouseConfig.getInstance().maxPages, DiamondAuctionHouse.ah.size() / PAGE_SIZE);
+        return Math.min(DiamondsAuctionHouseConfig.getInstance().maxPages, DiamondsAuctionHouse.ah.size() / PAGE_SIZE + 1);
     }
 
     protected AuctionHouseDisplayElement getElement(int id) {
         final int id1 = page * PAGE_SIZE + id;
-        if (id1 >= DiamondAuctionHouse.ah.size()) {
+        if (id1 >= DiamondsAuctionHouse.ah.size()) {
             return null;
         }
-        AuctionItem ai = DiamondAuctionHouse.ah.getItem(id1);
+        AuctionItem ai = DiamondsAuctionHouse.ah.getItem(id1);
         return AuctionHouseDisplayElement.of(
                 GuiElementBuilder.from(ai.getItemStack())
                         .addLoreLine(new TextComponent(ai.getTimeLeft()).withStyle(ChatFormatting.DARK_PURPLE))
                         .addLoreLine(new TextComponent("$" + ai.getPrice()).withStyle(ChatFormatting.DARK_PURPLE))
-                        //todo change callback
                         .setCallback((x, y, z) -> {
                             playClickSound(this.player);
-                            openItemGui(DiamondAuctionHouse.ah.getItem(id1));
+                            openItemGui(DiamondsAuctionHouse.ah.getItem(id1));
                         }));
     }
 

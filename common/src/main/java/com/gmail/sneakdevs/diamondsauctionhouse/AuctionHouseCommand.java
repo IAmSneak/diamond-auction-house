@@ -1,8 +1,8 @@
-package com.gmail.sneakdevs.diamondauctionhouse;
+package com.gmail.sneakdevs.diamondsauctionhouse;
 
-import com.gmail.sneakdevs.diamondauctionhouse.auction.AuctionItem;
-import com.gmail.sneakdevs.diamondauctionhouse.config.DiamondAuctionHouseConfig;
-import com.gmail.sneakdevs.diamondauctionhouse.gui.AuctionHouseGui;
+import com.gmail.sneakdevs.diamondsauctionhouse.auction.AuctionItem;
+import com.gmail.sneakdevs.diamondsauctionhouse.config.DiamondsAuctionHouseConfig;
+import com.gmail.sneakdevs.diamondsauctionhouse.gui.AuctionHouseGui;
 import com.gmail.sneakdevs.diamondeconomy.config.DiamondEconomyConfig;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -10,15 +10,18 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.core.Registry;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.level.ServerPlayer;
 
 public class AuctionHouseCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        if (!DiamondAuctionHouseConfig.getInstance().useBaseCommand || DiamondEconomyConfig.getInstance().commandName == null) {
-            dispatcher.register(Commands.literal(DiamondAuctionHouseConfig.getInstance().auctionHouseCommandName).executes(AuctionHouseCommand::auctionhouseCommand));
+        if (!DiamondsAuctionHouseConfig.getInstance().useBaseCommand || DiamondEconomyConfig.getInstance().commandName == null) {
+            dispatcher.register(Commands.literal(DiamondsAuctionHouseConfig.getInstance().auctionHouseCommandName).executes(AuctionHouseCommand::auctionhouseCommand));
             dispatcher.register(
-                    Commands.literal(DiamondAuctionHouseConfig.getInstance().auctionCommandName)
+                    Commands.literal(DiamondsAuctionHouseConfig.getInstance().auctionCommandName)
                             .then(
                                     Commands.argument("price", IntegerArgumentType.integer(0)).executes(e -> {
                                         int price = IntegerArgumentType.getInteger(e, "price");
@@ -30,13 +33,13 @@ public class AuctionHouseCommand {
             dispatcher.register(
                     Commands.literal(DiamondEconomyConfig.getInstance().commandName)
                             .then(
-                                    Commands.literal(DiamondAuctionHouseConfig.getInstance().auctionHouseCommandName).executes(AuctionHouseCommand::auctionhouseCommand)
+                                    Commands.literal(DiamondsAuctionHouseConfig.getInstance().auctionHouseCommandName).executes(AuctionHouseCommand::auctionhouseCommand)
                             )
             );
             dispatcher.register(
                     Commands.literal(DiamondEconomyConfig.getInstance().commandName)
                             .then(
-                                    Commands.literal(DiamondAuctionHouseConfig.getInstance().auctionCommandName)
+                                    Commands.literal(DiamondsAuctionHouseConfig.getInstance().auctionCommandName)
                                             .then(
                                                     Commands.argument("price", IntegerArgumentType.integer(0)).executes(e -> {
                                                         int price = IntegerArgumentType.getInteger(e, "price");
@@ -63,7 +66,12 @@ public class AuctionHouseCommand {
             return 0;
         }
         //todo check if player has too many items on auction
-        if (DiamondAuctionHouse.ah.addItem(new AuctionItem(DiamondAuctionHouse.getDatabaseManager().addItem(player.getStringUUID(), player.getName().getString(), price, DiamondAuctionHouseConfig.getInstance().auctionSeconds, player.getMainHandItem().getTag().getAsString()), player.getStringUUID(), player.getName().getString(), price, DiamondAuctionHouseConfig.getInstance().auctionSeconds, player.getMainHandItem()))) {
+        if (DiamondsAuctionHouse.ah.canAddItem()) {
+            CompoundTag tag = player.getMainHandItem().getOrCreateTag();
+            tag.putString("id", String.valueOf(Registry.ITEM.getKey(player.getMainHandItem().getItem())));
+            tag.putInt("Count", player.getMainHandItem().getCount());
+            DiamondsAuctionHouse.ah.addItem(new AuctionItem(1, player.getStringUUID(), player.getName().getString(), price, DiamondsAuctionHouseConfig.getInstance().auctionSeconds, player.getMainHandItem()));
+            DiamondsAuctionHouse.getDatabaseManager().addItem(player.getStringUUID(), player.getName().getString(), price, tag.getAsString(), DiamondsAuctionHouseConfig.getInstance().auctionSeconds);
             player.getInventory().removeItem(player.getMainHandItem());
             ctx.getSource().sendSuccess(new TextComponent("Item successfully added to auction house for $" + price), true);
             return 0;

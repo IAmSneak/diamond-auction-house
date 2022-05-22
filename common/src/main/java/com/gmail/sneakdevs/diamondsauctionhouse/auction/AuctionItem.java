@@ -1,10 +1,9 @@
-package com.gmail.sneakdevs.diamondauctionhouse.auction;
+package com.gmail.sneakdevs.diamondsauctionhouse.auction;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import org.lwjgl.system.CallbackI;
 
 public class AuctionItem {
     private final ItemStack itemStack;
@@ -26,6 +25,7 @@ public class AuctionItem {
     public AuctionItem(int id, String playerUuid, String owner, int price, int secondsLeft, String tag) {
         ItemStack itemStack1;
         this.id = id;
+        //todo currently does correct item and stack size, needs to add other data
         try {
             itemStack1 = ItemStack.of(NbtUtils.snbtToStructure(tag));
         } catch (CommandSyntaxException e) {
@@ -37,6 +37,14 @@ public class AuctionItem {
         this.owner = owner;
         this.price = price;
         this.secondsLeft = secondsLeft;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public int getSecondsLeft() {
+        return secondsLeft;
     }
 
     public ItemStack getItemStack() {

@@ -11,7 +11,7 @@ dependencies {
         exclude(group: "net.fabricmc.fabric-api")
     }
     modApi "me.shedaniel.cloth:cloth-config-forge:${rootProject.cloth_config_version}"
-    modApi ('com.github.IAmSneak:diamond-economy:4d516b37ea')
+    modApi ('com.github.IAmSneak:diamond-economy:c44ccb89c8')
 }
 
 publishing {
