@@ -141,6 +141,7 @@ public class ExpiredItemsGui extends SimpleGui {
     private void collectItem(AuctionItem item) {
         if (player.getInventory().getFreeSlot() != -1) {
             DiamondsAuctionHouse.getDatabaseManager().removeItemFromExpired(item);
+            expired.removeItem(item);
             player.getInventory().add(item.getItemStack());
             updateDisplay();
         }
