@@ -12,7 +12,6 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -68,10 +67,7 @@ public class AuctionHouseCommand {
         //todo check if player has too many items on auction
         if (DiamondsAuctionHouse.ah.canAddItem()) {
             CompoundTag tag = player.getMainHandItem().getOrCreateTag();
-            tag.putString("id", String.valueOf(Registry.ITEM.getKey(player.getMainHandItem().getItem())));
-            tag.putInt("Count", player.getMainHandItem().getCount());
-            DiamondsAuctionHouse.ah.addItem(new AuctionItem(1, player.getStringUUID(), player.getName().getString(), price, DiamondsAuctionHouseConfig.getInstance().auctionSeconds, player.getMainHandItem()));
-            DiamondsAuctionHouse.getDatabaseManager().addItem(player.getStringUUID(), player.getName().getString(), price, tag.getAsString(), DiamondsAuctionHouseConfig.getInstance().auctionSeconds);
+            DiamondsAuctionHouse.ah.addItem(new AuctionItem(DiamondsAuctionHouse.getDatabaseManager().addItemToAuction(player.getStringUUID(), player.getName().getString(), tag.getAsString(), String.valueOf(Registry.ITEM.getKey(player.getMainHandItem().getItem())), player.getMainHandItem().getCount(), price, DiamondsAuctionHouseConfig.getInstance().auctionSeconds), player.getStringUUID(), player.getName().getString(), player.getMainHandItem(), price, DiamondsAuctionHouseConfig.getInstance().auctionSeconds));
             player.getInventory().removeItem(player.getMainHandItem());
             ctx.getSource().sendSuccess(new TextComponent("Item successfully added to auction house for $" + price), true);
             return 0;

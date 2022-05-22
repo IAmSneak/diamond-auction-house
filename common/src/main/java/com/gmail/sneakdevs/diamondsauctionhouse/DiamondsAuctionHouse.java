@@ -22,8 +22,8 @@ public class DiamondsAuctionHouse {
     }
 
     public static void init(){
-        DiamondEconomy.registerTable("CREATE TABLE IF NOT EXISTS auctionhouse (id integer PRIMARY KEY AUTOINCREMENT, playeruuid text, owner text NOT NULL, price integer, tag text, secondsleft integer);");
-        DiamondEconomy.registerTable("CREATE TABLE IF NOT EXISTS expireditems (id integer PRIMARY KEY AUTOINCREMENT, playeruuid text, owner text NOT NULL, price integer, tag text);");
+        DiamondEconomy.registerTable("CREATE TABLE IF NOT EXISTS auctionhouse (id integer PRIMARY KEY AUTOINCREMENT, playeruuid text NOT NULL, owner text NOT NULL, tag text NOT NULL, item text NOT NULL, count integer NOT NULL, price integer NOT NULL, secondsleft integer NOT NULL);");
+        DiamondEconomy.registerTable("CREATE TABLE IF NOT EXISTS expireditems (id integer PRIMARY KEY, playeruuid text NOT NULL, owner text NOT NULL, tag text NOT NULL, item text NOT NULL, count integer NOT NULL, price integer NOT NULL);");
         AutoConfig.register(DiamondsAuctionHouseConfig.class, JanksonConfigSerializer::new);
     }
 }

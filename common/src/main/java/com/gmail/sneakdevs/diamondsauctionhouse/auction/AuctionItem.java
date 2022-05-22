@@ -1,46 +1,57 @@
 package com.gmail.sneakdevs.diamondsauctionhouse.auction;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+
 
 public class AuctionItem {
     private final ItemStack itemStack;
     private final String uuid;
     private final String owner;
+    private final String tag;
     private final int price;
     private final int id;
     private int secondsLeft;
 
-    public AuctionItem(int id, String playerUuid, String owner, int price, int secondsLeft, ItemStack stack) {
+    public AuctionItem(int id, String playerUuid, String owner, ItemStack stack, int price, int secondsLeft) {
         this.id = id;
         this.itemStack = stack;
         this.uuid = playerUuid;
         this.owner = owner;
+        this.tag = itemStack.getOrCreateTag().getAsString();
         this.price = price;
         this.secondsLeft = secondsLeft;
     }
 
-    public AuctionItem(int id, String playerUuid, String owner, int price, int secondsLeft, String tag) {
+    public AuctionItem(int id, String playerUuid, String owner, String tag, String item, int count, int price, int secondsLeft) {
         ItemStack itemStack1;
         this.id = id;
-        //todo currently does correct item and stack size, needs to add other data
         try {
-            itemStack1 = ItemStack.of(NbtUtils.snbtToStructure(tag));
+            itemStack1 = new ItemStack(Registry.ITEM.get(ResourceLocation.tryParse(item)), count);
+            itemStack1.setTag(NbtUtils.snbtToStructure(tag));
         } catch (CommandSyntaxException e) {
             e.printStackTrace();
             itemStack1 = new ItemStack(Items.AIR);
         }
         this.itemStack = itemStack1;
+        this.tag = tag;
         this.uuid = playerUuid;
         this.owner = owner;
         this.price = price;
         this.secondsLeft = secondsLeft;
+
     }
 
     public int getId() {
         return id;
+    }
+
+    public String getTag() {
+        return tag;
     }
 
     public int getSecondsLeft() {
@@ -57,6 +68,10 @@ public class AuctionItem {
 
     public String getOwner() {
         return owner;
+    }
+
+    public String getName() {
+        return String.valueOf(Registry.ITEM.getKey(itemStack.getItem()));
     }
 
     public int getPrice() {

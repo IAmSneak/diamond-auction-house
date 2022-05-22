@@ -1,6 +1,7 @@
 package com.gmail.sneakdevs.diamondsauctionhouse.gui;
 
 import com.gmail.sneakdevs.diamondeconomy.DiamondEconomy;
+import com.gmail.sneakdevs.diamondsauctionhouse.DiamondsAuctionHouse;
 import com.gmail.sneakdevs.diamondsauctionhouse.auction.AuctionItem;
 import eu.pb4.sgui.api.elements.GuiElement;
 import eu.pb4.sgui.api.elements.GuiElementBuilder;
@@ -8,6 +9,7 @@ import eu.pb4.sgui.api.elements.GuiElementBuilderInterface;
 import eu.pb4.sgui.api.elements.GuiElementInterface;
 import eu.pb4.sgui.api.gui.SimpleGui;
 import net.minecraft.ChatFormatting;
+import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -55,13 +57,7 @@ public class AuctionItemGui extends SimpleGui {
                             .setName(new TextComponent("Price: $" + item.getPrice()).withStyle(ChatFormatting.BLUE))
                             .hideFlags()
             );
-            case 2 -> AuctionItemDisplayElement.of(
-                    //todo head
-                    new GuiElementBuilder(Items.PLAYER_HEAD)
-                            .setSkullOwner(item.getUuid())
-                            .setName(new TextComponent("Owner: " + item.getOwner()).withStyle(ChatFormatting.BLUE))
-                            .hideFlags()
-            );
+            case 2 -> skull();
             case 4 -> AuctionItemDisplayElement.of(GuiElementBuilder.from(item.getItemStack()));
             case 6 -> confirm();
             case 7 -> AuctionItemDisplayElement.of(
@@ -94,7 +90,7 @@ public class AuctionItemGui extends SimpleGui {
         player.playNotifySound(SoundEvents.UI_BUTTON_CLICK, SoundSource.MASTER, 1, 1);
     }
 
-    public AuctionItemDisplayElement confirm() {
+    private AuctionItemDisplayElement confirm() {
         if (item.getPrice() < DiamondEconomy.getDatabaseManager().getBalanceFromUUID(player.getStringUUID())) {
             return AuctionItemDisplayElement.of(
                     new GuiElementBuilder(Items.GREEN_STAINED_GLASS_PANE)
@@ -112,15 +108,28 @@ public class AuctionItemGui extends SimpleGui {
         }
     }
 
-    public AuctionItemDisplayElement trash() {
+    private AuctionItemDisplayElement trash() {
         if (player.hasPermissions(4) || player.getStringUUID().equals(item.getUuid())) {
             return AuctionItemDisplayElement.of(
                     new GuiElementBuilder(Items.HOPPER)
                             .setName(new TextComponent("Remove from Auction").withStyle(ChatFormatting.RED))
-                            .hideFlags());
+                            .hideFlags()
+                            .setCallback((x, y, z) -> {
+                                playClickSound(this.player);
+                                this.remove();
+                            }));
         } else {
             return AuctionItemDisplayElement.EMPTY;
         }
+    }
+
+    //todo head
+    private AuctionItemDisplayElement skull() {
+        ItemStack stack = new ItemStack(Items.PLAYER_HEAD);
+        stack.getOrCreateTag().putString("SkullOwner",  item.getOwner());
+        return AuctionItemDisplayElement.of(GuiElementBuilder.from(stack)
+                .setName(new TextComponent("Owner: " + item.getOwner()).withStyle(ChatFormatting.BLUE))
+                .hideFlags());
     }
 
     @Override
@@ -132,9 +141,22 @@ public class AuctionItemGui extends SimpleGui {
         super.close();
     }
 
-    public void buy() {
-        if (DiamondEconomy.getDatabaseManager().changeBalance(item.getUuid(), item.getPrice())) {
-            DiamondEconomy.getDatabaseManager().changeBalance(player.getStringUUID(), -item.getPrice());
+    private void remove() {
+        DiamondsAuctionHouse.getDatabaseManager().expireItem(item);
+        close();
+    }
+
+    private void buy() {
+        if (DiamondsAuctionHouse.getDatabaseManager().itemForAuction(item.getId())) {
+            if (player.getInventory().getFreeSlot() != -1) {
+                if (DiamondEconomy.getDatabaseManager().changeBalance(item.getUuid(), item.getPrice())) {
+                    DiamondEconomy.getDatabaseManager().changeBalance(player.getStringUUID(), -item.getPrice());
+                    DiamondsAuctionHouse.getDatabaseManager().removeItemFromAuction(item);
+                    player.getInventory().add(item.getItemStack());
+                }
+            }
+        } else {
+            player.sendMessage(new TextComponent("ahhh"), player.getUUID());
         }
         super.close();
     }

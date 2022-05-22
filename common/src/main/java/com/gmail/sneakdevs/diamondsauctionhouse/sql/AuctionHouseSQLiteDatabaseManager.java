@@ -23,7 +23,7 @@ public class AuctionHouseSQLiteDatabaseManager implements AuctionHouseDatabaseMa
 
         try (Connection conn = DriverManager.getConnection(SQLiteDatabaseManager.url); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
-                list.add(new AuctionItem(rs.getInt("id"), rs.getString("playeruuid"), rs.getString("owner"), rs.getInt("price"), rs.getInt("secondsleft"), rs.getString("tag")));
+                list.add(new AuctionItem(rs.getInt("id"), rs.getString("playeruuid"), rs.getString("owner"), rs.getString("tag"), rs.getString("item"), rs.getInt("count"), rs.getInt("price"), rs.getInt("secondsleft")));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -31,15 +31,17 @@ public class AuctionHouseSQLiteDatabaseManager implements AuctionHouseDatabaseMa
         return list;
     }
 
-    public int addItem(String playeruuid, String owner, int price, String tag, int secondsleft) {
-        String sql = "INSERT INTO auctionhouse(playeruuid,owner,price,tag,secondsleft) VALUES(?,?,?,?,?)";
+    public int addItemToAuction(String playeruuid, String owner, String tag, String item, int count, int price, int secondsleft) {
+        String sql = "INSERT INTO auctionhouse(playeruuid,owner,tag,item,count,price,secondsleft) VALUES(?,?,?,?,?,?,?)";
 
         try (Connection conn = this.connect(); PreparedStatement pstmt = conn.prepareStatement(sql)){
             pstmt.setString(1, playeruuid);
             pstmt.setString(2, owner);
-            pstmt.setInt(3, price);
-            pstmt.setString(4, tag);
-            pstmt.setInt(5, secondsleft);
+            pstmt.setString(3, tag);
+            pstmt.setString(4, item);
+            pstmt.setInt(5, count);
+            pstmt.setInt(6, price);
+            pstmt.setInt(7, secondsleft);
             pstmt.executeUpdate();
             return getMostRecentId();
         } catch (SQLException e) {
@@ -68,5 +70,54 @@ public class AuctionHouseSQLiteDatabaseManager implements AuctionHouseDatabaseMa
             e.printStackTrace();
         }
         return -1;
+    }
+
+    public boolean itemForAuction(int id) {
+        String sql = "SELECT Count(id) FROM auctionhouse WHERE id = " + id;
+        try (Connection conn = this.connect(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)){
+            rs.next();
+            return rs.getInt(1) > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public void removeItemFromAuction(AuctionItem item) {
+        String sql = "DELETE FROM auctionhouse WHERE id = ?";
+
+        try (Connection conn = this.connect(); PreparedStatement pstmt = conn.prepareStatement(sql)){
+            pstmt.setInt(1, item.getId());
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void removeItemFromExpired(AuctionItem item) {
+        String sql = "DELETE FROM expireditems WHERE id = ?";
+
+        try (Connection conn = this.connect(); PreparedStatement pstmt = conn.prepareStatement(sql)){
+            pstmt.setInt(1, item.getId());
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void expireItem(AuctionItem item) {
+        removeItemFromAuction(item);
+        String sql = "INSERT INTO expireditems(playeruuid,owner,tag,item,count,price) VALUES(?,?,?,?,?,?)";
+        try (Connection conn = this.connect(); PreparedStatement pstmt = conn.prepareStatement(sql)){
+            pstmt.setString(1, item.getUuid());
+            pstmt.setString(2, item.getOwner());
+            pstmt.setString(3, item.getTag());
+            pstmt.setString(4, item.getName());
+            pstmt.setInt(5, item.getItemStack().getCount());
+            pstmt.setInt(6, item.getPrice());
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }

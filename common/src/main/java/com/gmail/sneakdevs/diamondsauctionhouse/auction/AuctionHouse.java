@@ -35,7 +35,7 @@ public class AuctionHouse {
             int i = 0;
             while (i < items.size()) {
                 if (items.get(i).tickDeath()) {
-                    //todo add to player expired items
+                    DiamondsAuctionHouse.getDatabaseManager().expireItem(items.get(i));
                     items.remove(i);
                 } else {
                     i++;

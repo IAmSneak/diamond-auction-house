@@ -4,7 +4,7 @@
   "package": "com.gmail.sneakdevs.diamondsauctionhouse.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "MinecraftServerMixin_DiamondsAuctionHouse"
+    "MinecraftServerMixin_DiamondsAuctionHouse",
   ],
   "injectors": {
     "defaultRequire": 1

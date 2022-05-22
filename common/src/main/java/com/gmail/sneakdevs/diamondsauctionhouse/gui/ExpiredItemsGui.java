@@ -32,7 +32,6 @@ import eu.pb4.sgui.api.elements.GuiElementBuilder;
 import eu.pb4.sgui.api.elements.GuiElementBuilderInterface;
 import eu.pb4.sgui.api.elements.GuiElementInterface;
 import eu.pb4.sgui.api.gui.SimpleGui;
-
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -45,12 +44,11 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.Nullable;
 
-public class AuctionHouseGui extends SimpleGui {
+public class ExpiredItemsGui extends SimpleGui {
     public static final int PAGE_SIZE = 45; //9x5
     protected int page = 0;
-    private int ticker = 0;
 
-    public <T extends AuctionHouseGui> AuctionHouseGui(ServerPlayer player) {
+    public <T extends ExpiredItemsGui> ExpiredItemsGui(ServerPlayer player) {
         super(MenuType.GENERIC_9x6, player, false);
     }
 
@@ -115,16 +113,6 @@ public class AuctionHouseGui extends SimpleGui {
                             })
             );
             case 5 -> AuctionHouseDisplayElement.nextPage(this);
-            case 8 -> AuctionHouseDisplayElement.of(
-                    new GuiElementBuilder(Items.HOPPER)
-                            .setName(new TextComponent("Expired Items").withStyle(ChatFormatting.RED))
-                            .hideFlags()
-                            .setCallback((x, y, z) -> {
-                                playClickSound(this.player);
-                                this.openExpiredGui();
-                            })
-            );
-
             default -> AuctionHouseDisplayElement.filler();
         };
     }
@@ -139,45 +127,24 @@ public class AuctionHouseGui extends SimpleGui {
 
     protected AuctionHouseDisplayElement getElement(int id) {
         final int id1 = page * PAGE_SIZE + id;
+        //todo add expired lists
         if (id1 >= DiamondsAuctionHouse.ah.size()) {
             return null;
         }
-        AuctionItem ai = DiamondsAuctionHouse.ah.getItem(id1);
         return AuctionHouseDisplayElement.of(
-                GuiElementBuilder.from(ai.getItemStack())
-                        .addLoreLine(new TextComponent(ai.getTimeLeft()).withStyle(ChatFormatting.DARK_PURPLE))
-                        .addLoreLine(new TextComponent("$" + ai.getPrice()).withStyle(ChatFormatting.DARK_PURPLE))
+                GuiElementBuilder.from(DiamondsAuctionHouse.ah.getItem(id1).getItemStack())
                         .setCallback((x, y, z) -> {
                             playClickSound(this.player);
-                            openItemGui(DiamondsAuctionHouse.ah.getItem(id1));
+                            collectItem(DiamondsAuctionHouse.ah.getItem(id1));
                         }));
     }
 
-    @Override
-    public void onTick() {
-        ticker++;
-        if (ticker >= 20) {
-            ticker = 0;
+    public void collectItem(AuctionItem item) {
+        if (player.getInventory().getFreeSlot() != -1) {
+            DiamondsAuctionHouse.getDatabaseManager().removeItemFromExpired(item);
+            player.getInventory().add(item.getItemStack());
             updateDisplay();
         }
-
-        super.onTick();
-    }
-
-    public void openItemGui(AuctionItem item) {
-        this.close();
-        AuctionItemGui gui = new AuctionItemGui(player, item);
-        gui.updateDisplay();
-        gui.setTitle(new TextComponent("Buy"));
-        gui.open();
-    }
-
-    public void openExpiredGui() {
-        this.close();
-        ExpiredItemsGui gui = new ExpiredItemsGui(player);
-        gui.updateDisplay();
-        gui.setTitle(new TextComponent("Expired Items"));
-        gui.open();
     }
 
     public static void playClickSound(ServerPlayer player) {
@@ -200,7 +167,7 @@ public class AuctionHouseGui extends SimpleGui {
             return new AuctionHouseDisplayElement(element.build(), null);
         }
 
-        public static AuctionHouseDisplayElement nextPage(AuctionHouseGui gui) {
+        public static AuctionHouseDisplayElement nextPage(ExpiredItemsGui gui) {
             if (gui.canNextPage()) {
                 return AuctionHouseDisplayElement.of(
                         new GuiElementBuilder(Items.PLAYER_HEAD)
@@ -220,7 +187,7 @@ public class AuctionHouseGui extends SimpleGui {
             }
         }
 
-        public static AuctionHouseDisplayElement previousPage(AuctionHouseGui gui) {
+        public static AuctionHouseDisplayElement previousPage(ExpiredItemsGui gui) {
             if (gui.canPreviousPage()) {
                 return AuctionHouseDisplayElement.of(
                         new GuiElementBuilder(Items.PLAYER_HEAD)
