@@ -1,6 +1,7 @@
 package com.gmail.sneakdevs.diamondsauctionhouse.gui;
 
 import com.gmail.sneakdevs.diamondeconomy.DiamondEconomy;
+import com.gmail.sneakdevs.diamondeconomy.DiamondUtils;
 import com.gmail.sneakdevs.diamondsauctionhouse.DiamondsAuctionHouse;
 import com.gmail.sneakdevs.diamondsauctionhouse.auction.AuctionItem;
 import eu.pb4.sgui.api.elements.GuiElement;
@@ -90,7 +91,7 @@ public class AuctionItemGui extends SimpleGui {
     }
 
     private DisplayElement confirm() {
-        if (item.getPrice() < DiamondEconomy.getDatabaseManager().getBalanceFromUUID(player.getStringUUID())) {
+        if (item.getPrice() < DiamondUtils.getDatabaseManager().getBalanceFromUUID(player.getStringUUID())) {
             return DisplayElement.of(
                     new GuiElementBuilder(Items.GREEN_STAINED_GLASS_PANE)
                             .setName(new TextComponent("Confirm").withStyle(ChatFormatting.GREEN))
@@ -147,8 +148,8 @@ public class AuctionItemGui extends SimpleGui {
     private void buy() {
         if (DiamondsAuctionHouse.getDatabaseManager().isItemForAuction(item.getId())) {
             if (player.getInventory().getFreeSlot() != -1) {
-                if (DiamondEconomy.getDatabaseManager().changeBalance(item.getUuid(), item.getPrice())) {
-                    DiamondEconomy.getDatabaseManager().changeBalance(player.getStringUUID(), -item.getPrice());
+                if (DiamondUtils.getDatabaseManager().changeBalance(item.getUuid(), item.getPrice())) {
+                    DiamondUtils.getDatabaseManager().changeBalance(player.getStringUUID(), -item.getPrice());
                     DiamondsAuctionHouse.getDatabaseManager().removeItemFromAuction(item);
                     DiamondsAuctionHouse.ah.removeItem(item);
                     player.getInventory().add(item.getItemStack());

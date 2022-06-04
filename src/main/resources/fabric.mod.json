@@ -27,7 +27,7 @@
 
   "depends": {
     "fabricloader": ">=0.7.4",
-    "diamondeconomy": ">=1.4.0",
+    "diamondeconomy": ">=1.5.0",
     "cloth-config2": ">=6.2.57",
     "fabric-permissions-api-v0": "*"
   }
