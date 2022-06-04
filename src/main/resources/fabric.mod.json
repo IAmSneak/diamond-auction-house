@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "id": "diamondsauctionhouse",
+  "version": "${version}",
+
+  "name": "Diamond Auction House",
+  "description": "Adds an Auction House for the diamond economy mod",
+  "authors": [
+    "IAmSneak"
+  ],
+  "contact": {
+    "homepage": "",
+    "sources": ""
+  },
+
+  "license": "MIT",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.gmail.sneakdevs.diamondsauctionhouse.DiamondsAuctionHouse"
+    ]
+  },
+  "mixins": [
+    "diamondsauctionhouse.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.7.4",
+    "diamondeconomy": ">=1.4.0",
+    "cloth-config2": ">=6.2.57",
+    "fabric-permissions-api-v0": "*"
+  }
+}
