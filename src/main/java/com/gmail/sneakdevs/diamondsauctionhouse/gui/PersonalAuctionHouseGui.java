@@ -34,8 +34,7 @@ import eu.pb4.sgui.api.elements.GuiElementBuilderInterface;
 import eu.pb4.sgui.api.elements.GuiElementInterface;
 import eu.pb4.sgui.api.gui.SimpleGui;
 import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -108,7 +107,7 @@ public class PersonalAuctionHouseGui extends SimpleGui {
         return switch (id) {
             case 0 -> DisplayElement.of(
                     new GuiElementBuilder(Items.RED_CONCRETE)
-                            .setName(new TextComponent("Back").withStyle(ChatFormatting.RED))
+                            .setName(Component.literal("Back").withStyle(ChatFormatting.RED))
                             .hideFlags()
                             .setCallback((x, y, z) -> {
                                 playClickSound(this.player);
@@ -117,7 +116,7 @@ public class PersonalAuctionHouseGui extends SimpleGui {
             case 3 -> DisplayElement.previousPage(this);
             case 4 -> DisplayElement.of(
                     new GuiElementBuilder(Items.BARRIER)
-                            .setName(new TranslatableComponent("spectatorMenu.close").withStyle(ChatFormatting.RED))
+                            .setName(Component.translatable("spectatorMenu.close").withStyle(ChatFormatting.RED))
                             .hideFlags()
                             .setCallback((x, y, z) -> {
                                 playClickSound(this.player);
@@ -127,7 +126,7 @@ public class PersonalAuctionHouseGui extends SimpleGui {
             case 5 -> DisplayElement.nextPage(this);
             case 8 -> DisplayElement.of(
                     new GuiElementBuilder(Items.HOPPER)
-                            .setName(new TextComponent("Expired Items").withStyle(ChatFormatting.RED))
+                            .setName(Component.literal("Expired Items").withStyle(ChatFormatting.RED))
                             .hideFlags()
                             .setCallback((x, y, z) -> {
                                 playClickSound(this.player);
@@ -147,7 +146,7 @@ public class PersonalAuctionHouseGui extends SimpleGui {
         this.close();
         AuctionHouseGui gui = new AuctionHouseGui(player);
         gui.updateDisplay();
-        gui.setTitle(new TextComponent("Auction House"));
+        gui.setTitle(Component.literal("Auction House"));
         gui.open();
     }
 
@@ -159,8 +158,8 @@ public class PersonalAuctionHouseGui extends SimpleGui {
         AuctionItem ai = ah.getItem(id1);
         return DisplayElement.of(
                 GuiElementBuilder.from(ai.getItemStack())
-                        .addLoreLine(new TextComponent(ai.getTimeLeft()).withStyle(ChatFormatting.DARK_PURPLE))
-                        .addLoreLine(new TextComponent("$" + ai.getPrice()).withStyle(ChatFormatting.DARK_PURPLE))
+                        .addLoreLine(Component.literal(ai.getTimeLeft()).withStyle(ChatFormatting.DARK_PURPLE))
+                        .addLoreLine(Component.literal("$" + ai.getPrice()).withStyle(ChatFormatting.DARK_PURPLE))
                         .setCallback((x, y, z) -> {
                             playClickSound(this.player);
                             openItemGui(ah.getItem(id1));
@@ -183,7 +182,7 @@ public class PersonalAuctionHouseGui extends SimpleGui {
         this.close();
         AuctionItemGui gui = new AuctionItemGui(player, item);
         gui.updateDisplay();
-        gui.setTitle(new TextComponent("Buy"));
+        gui.setTitle(Component.literal("Buy"));
         gui.open();
     }
 
@@ -191,7 +190,7 @@ public class PersonalAuctionHouseGui extends SimpleGui {
         this.close();
         ExpiredItemsGui gui = new ExpiredItemsGui(player);
         gui.updateDisplay();
-        gui.setTitle(new TextComponent("Expired Items"));
+        gui.setTitle(Component.literal("Expired Items"));
         gui.open();
     }
 
@@ -203,7 +202,7 @@ public class PersonalAuctionHouseGui extends SimpleGui {
         private static final DisplayElement EMPTY = DisplayElement.of(new GuiElement(ItemStack.EMPTY, GuiElementInterface.EMPTY_CALLBACK));
         private static final DisplayElement FILLER = DisplayElement.of(
                 new GuiElementBuilder(Items.LIGHT_GRAY_STAINED_GLASS_PANE)
-                        .setName(new TextComponent(""))
+                        .setName(Component.literal(""))
                         .hideFlags()
         );
 
@@ -219,7 +218,7 @@ public class PersonalAuctionHouseGui extends SimpleGui {
             if (gui.canNextPage()) {
                 return DisplayElement.of(
                         new GuiElementBuilder(Items.PLAYER_HEAD)
-                                .setName(new TranslatableComponent("spectatorMenu.next_page").withStyle(ChatFormatting.WHITE))
+                                .setName(Component.translatable("spectatorMenu.next_page").withStyle(ChatFormatting.WHITE))
                                 .hideFlags()
                                 .setSkullOwner(GuiTextures.GUI_NEXT_PAGE)
                                 .setCallback((x, y, z) -> {
@@ -229,7 +228,7 @@ public class PersonalAuctionHouseGui extends SimpleGui {
             } else {
                 return DisplayElement.of(
                         new GuiElementBuilder(Items.PLAYER_HEAD)
-                                .setName(new TranslatableComponent("spectatorMenu.next_page").withStyle(ChatFormatting.DARK_GRAY))
+                                .setName(Component.translatable("spectatorMenu.next_page").withStyle(ChatFormatting.DARK_GRAY))
                                 .hideFlags()
                                 .setSkullOwner(GuiTextures.GUI_NEXT_PAGE_BLOCKED));
             }
@@ -239,7 +238,7 @@ public class PersonalAuctionHouseGui extends SimpleGui {
             if (gui.canPreviousPage()) {
                 return DisplayElement.of(
                         new GuiElementBuilder(Items.PLAYER_HEAD)
-                                .setName(new TranslatableComponent("spectatorMenu.previous_page").withStyle(ChatFormatting.WHITE))
+                                .setName(Component.translatable("spectatorMenu.previous_page").withStyle(ChatFormatting.WHITE))
                                 .hideFlags()
                                 .setSkullOwner(GuiTextures.GUI_PREVIOUS_PAGE)
                                 .setCallback((x, y, z) -> {
@@ -249,7 +248,7 @@ public class PersonalAuctionHouseGui extends SimpleGui {
             } else {
                 return DisplayElement.of(
                         new GuiElementBuilder(Items.PLAYER_HEAD)
-                                .setName(new TranslatableComponent("spectatorMenu.previous_page").withStyle(ChatFormatting.DARK_GRAY))
+                                .setName(Component.translatable("spectatorMenu.previous_page").withStyle(ChatFormatting.DARK_GRAY))
                                 .hideFlags()
                                 .setSkullOwner(GuiTextures.GUI_PREVIOUS_PAGE_BLOCKED));
             }

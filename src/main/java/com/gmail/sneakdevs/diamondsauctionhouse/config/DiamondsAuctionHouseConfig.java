@@ -12,7 +12,7 @@ import net.minecraft.server.level.ServerPlayer;
 public class DiamondsAuctionHouseConfig implements ConfigData {
     @Comment("Name of the command to open the auction house GUI")
     public String auctionHouseCommandName = "auc";
-    @Comment("Name of the command to put something up for auction")
+    @Comment("Name of the sub-command to put something up for auction")
     public String auctionCommandName = "auc";
     @Comment("Use the base diamond economy command")
     public boolean useBaseCommand = false;

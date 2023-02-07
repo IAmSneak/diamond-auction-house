@@ -34,8 +34,7 @@ import eu.pb4.sgui.api.elements.GuiElementBuilderInterface;
 import eu.pb4.sgui.api.elements.GuiElementInterface;
 import eu.pb4.sgui.api.gui.SimpleGui;
 import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -109,7 +108,7 @@ public class ExpiredItemsGui extends SimpleGui {
             case 3 -> DisplayElement.previousPage(this);
             case 4 -> DisplayElement.of(
                     new GuiElementBuilder(Items.BARRIER)
-                            .setName(new TranslatableComponent("spectatorMenu.close").withStyle(ChatFormatting.RED))
+                            .setName(Component.translatable("spectatorMenu.close").withStyle(ChatFormatting.RED))
                             .hideFlags()
                             .setCallback((x, y, z) -> {
                                 playClickSound(this.player);
@@ -167,7 +166,7 @@ public class ExpiredItemsGui extends SimpleGui {
         private static final DisplayElement EMPTY = DisplayElement.of(new GuiElement(ItemStack.EMPTY, GuiElementInterface.EMPTY_CALLBACK));
         private static final DisplayElement FILLER = DisplayElement.of(
                 new GuiElementBuilder(Items.LIGHT_GRAY_STAINED_GLASS_PANE)
-                        .setName(new TextComponent(""))
+                        .setName(Component.literal(""))
                         .hideFlags()
         );
 
@@ -183,7 +182,7 @@ public class ExpiredItemsGui extends SimpleGui {
             if (gui.canNextPage()) {
                 return DisplayElement.of(
                         new GuiElementBuilder(Items.PLAYER_HEAD)
-                                .setName(new TranslatableComponent("spectatorMenu.next_page").withStyle(ChatFormatting.WHITE))
+                                .setName(Component.translatable("spectatorMenu.next_page").withStyle(ChatFormatting.WHITE))
                                 .hideFlags()
                                 .setSkullOwner(GuiTextures.GUI_NEXT_PAGE)
                                 .setCallback((x, y, z) -> {
@@ -193,7 +192,7 @@ public class ExpiredItemsGui extends SimpleGui {
             } else {
                 return DisplayElement.of(
                         new GuiElementBuilder(Items.PLAYER_HEAD)
-                                .setName(new TranslatableComponent("spectatorMenu.next_page").withStyle(ChatFormatting.DARK_GRAY))
+                                .setName(Component.translatable("spectatorMenu.next_page").withStyle(ChatFormatting.DARK_GRAY))
                                 .hideFlags()
                                 .setSkullOwner(GuiTextures.GUI_NEXT_PAGE_BLOCKED));
             }
@@ -203,7 +202,7 @@ public class ExpiredItemsGui extends SimpleGui {
             if (gui.canPreviousPage()) {
                 return DisplayElement.of(
                         new GuiElementBuilder(Items.PLAYER_HEAD)
-                                .setName(new TranslatableComponent("spectatorMenu.previous_page").withStyle(ChatFormatting.WHITE))
+                                .setName(Component.translatable("spectatorMenu.previous_page").withStyle(ChatFormatting.WHITE))
                                 .hideFlags()
                                 .setSkullOwner(GuiTextures.GUI_PREVIOUS_PAGE)
                                 .setCallback((x, y, z) -> {
@@ -213,7 +212,7 @@ public class ExpiredItemsGui extends SimpleGui {
             } else {
                 return DisplayElement.of(
                         new GuiElementBuilder(Items.PLAYER_HEAD)
-                                .setName(new TranslatableComponent("spectatorMenu.previous_page").withStyle(ChatFormatting.DARK_GRAY))
+                                .setName(Component.translatable("spectatorMenu.previous_page").withStyle(ChatFormatting.DARK_GRAY))
                                 .hideFlags()
                                 .setSkullOwner(GuiTextures.GUI_PREVIOUS_PAGE_BLOCKED));
             }

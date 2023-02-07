@@ -1,6 +1,5 @@
 package com.gmail.sneakdevs.diamondsauctionhouse.gui;
 
-import com.gmail.sneakdevs.diamondeconomy.DiamondEconomy;
 import com.gmail.sneakdevs.diamondeconomy.DiamondUtils;
 import com.gmail.sneakdevs.diamondsauctionhouse.DiamondsAuctionHouse;
 import com.gmail.sneakdevs.diamondsauctionhouse.auction.AuctionItem;
@@ -10,7 +9,7 @@ import eu.pb4.sgui.api.elements.GuiElementBuilderInterface;
 import eu.pb4.sgui.api.elements.GuiElementInterface;
 import eu.pb4.sgui.api.gui.SimpleGui;
 import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -49,12 +48,12 @@ public class AuctionItemGui extends SimpleGui {
         return switch (id) {
             case 0 -> DisplayElement.of(
                     new GuiElementBuilder(Items.CLOCK)
-                            .setName(new TextComponent("Time Left: " + item.getTimeLeft()).withStyle(ChatFormatting.BLUE))
+                            .setName(Component.literal("Time Left: " + item.getTimeLeft()).withStyle(ChatFormatting.BLUE))
                             .hideFlags()
             );
             case 1 -> DisplayElement.of(
                     new GuiElementBuilder(Items.PAPER)
-                            .setName(new TextComponent("Price: $" + item.getPrice()).withStyle(ChatFormatting.BLUE))
+                            .setName(Component.literal("Price: $" + item.getPrice()).withStyle(ChatFormatting.BLUE))
                             .hideFlags()
             );
             case 2 -> skull();
@@ -62,7 +61,7 @@ public class AuctionItemGui extends SimpleGui {
             case 6 -> confirm();
             case 7 -> DisplayElement.of(
                     new GuiElementBuilder(Items.RED_STAINED_GLASS_PANE)
-                            .setName(new TextComponent("Cancel").withStyle(ChatFormatting.RED))
+                            .setName(Component.literal("Cancel").withStyle(ChatFormatting.RED))
                             .hideFlags()
                             .setCallback((x, y, z) -> {
                                 playClickSound(this.player);
@@ -94,7 +93,7 @@ public class AuctionItemGui extends SimpleGui {
         if (item.getPrice() < DiamondUtils.getDatabaseManager().getBalanceFromUUID(player.getStringUUID())) {
             return DisplayElement.of(
                     new GuiElementBuilder(Items.GREEN_STAINED_GLASS_PANE)
-                            .setName(new TextComponent("Confirm").withStyle(ChatFormatting.GREEN))
+                            .setName(Component.literal("Confirm").withStyle(ChatFormatting.GREEN))
                             .hideFlags()
                             .setCallback((x, y, z) -> {
                                 playClickSound(this.player);
@@ -103,7 +102,7 @@ public class AuctionItemGui extends SimpleGui {
         } else {
             return DisplayElement.of(
                     new GuiElementBuilder(Items.GRAY_STAINED_GLASS_PANE)
-                            .setName(new TextComponent("Confirm").withStyle(ChatFormatting.DARK_GRAY))
+                            .setName(Component.literal("Confirm").withStyle(ChatFormatting.DARK_GRAY))
                             .hideFlags());
         }
     }
@@ -112,7 +111,7 @@ public class AuctionItemGui extends SimpleGui {
         if (player.hasPermissions(4) || player.getStringUUID().equals(item.getUuid())) {
             return DisplayElement.of(
                     new GuiElementBuilder(Items.HOPPER)
-                            .setName(new TextComponent("Remove from Auction").withStyle(ChatFormatting.RED))
+                            .setName(Component.literal("Remove from Auction").withStyle(ChatFormatting.RED))
                             .hideFlags()
                             .setCallback((x, y, z) -> {
                                 playClickSound(this.player);
@@ -127,7 +126,7 @@ public class AuctionItemGui extends SimpleGui {
         ItemStack stack = new ItemStack(Items.PLAYER_HEAD);
         stack.getOrCreateTag().putString("SkullOwner",  item.getOwner());
         return DisplayElement.of(GuiElementBuilder.from(stack)
-                .setName(new TextComponent("Owner: " + item.getOwner()).withStyle(ChatFormatting.BLUE))
+                .setName(Component.literal("Owner: " + item.getOwner()).withStyle(ChatFormatting.BLUE))
                 .hideFlags());
     }
 
@@ -135,7 +134,7 @@ public class AuctionItemGui extends SimpleGui {
     public void close() {
         AuctionHouseGui gui = new AuctionHouseGui(player);
         gui.updateDisplay();
-        gui.setTitle(new TextComponent("Auction House"));
+        gui.setTitle(Component.literal("Auction House"));
         gui.open();
         super.close();
     }
@@ -156,7 +155,7 @@ public class AuctionItemGui extends SimpleGui {
                 }
             }
         } else {
-            player.sendMessage(new TextComponent("That item was already bought"), player.getUUID());
+            player.displayClientMessage(Component.literal("That item was already bought"), true);
         }
         super.close();
     }
@@ -165,7 +164,7 @@ public class AuctionItemGui extends SimpleGui {
         private static final DisplayElement EMPTY = DisplayElement.of(new GuiElement(ItemStack.EMPTY, GuiElementInterface.EMPTY_CALLBACK));
         private static final DisplayElement FILLER = DisplayElement.of(
                 new GuiElementBuilder(Items.LIGHT_GRAY_STAINED_GLASS_PANE)
-                        .setName(new TextComponent(""))
+                        .setName(Component.literal(""))
                         .hideFlags()
         );
 

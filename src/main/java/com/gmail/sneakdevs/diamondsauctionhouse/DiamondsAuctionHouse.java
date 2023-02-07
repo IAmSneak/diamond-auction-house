@@ -9,7 +9,7 @@ import com.gmail.sneakdevs.diamondsauctionhouse.sql.AuctionHouseSQLiteDatabaseMa
 import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.serializer.JanksonConfigSerializer;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.server.MinecraftServer;
 
@@ -29,7 +29,7 @@ public class DiamondsAuctionHouse implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> AuctionHouseCommand.register(dispatcher));
+        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> AuctionHouseCommand.register(dispatcher));
         ServerLifecycleEvents.SERVER_STARTED.register(DiamondsAuctionHouse::initServer);
         DiamondUtils.registerTable("CREATE TABLE IF NOT EXISTS auctionhouse (id integer PRIMARY KEY AUTOINCREMENT, playeruuid text NOT NULL, owner text NOT NULL, tag text NOT NULL, item text NOT NULL, count integer NOT NULL, price integer NOT NULL, secondsleft integer NOT NULL);");
         DiamondUtils.registerTable("CREATE TABLE IF NOT EXISTS expireditems (id integer PRIMARY KEY, playeruuid text NOT NULL, owner text NOT NULL, tag text NOT NULL, item text NOT NULL, count integer NOT NULL, price integer NOT NULL);");
