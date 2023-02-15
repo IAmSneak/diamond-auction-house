@@ -86,7 +86,7 @@ public class AuctionItemGui extends SimpleGui {
     }
 
     public static void playClickSound(ServerPlayer player) {
-        player.playNotifySound(SoundEvents.UI_BUTTON_CLICK, SoundSource.MASTER, 1, 1);
+        player.playNotifySound(SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.MASTER, 1, 1);
     }
 
     private DisplayElement confirm() {
